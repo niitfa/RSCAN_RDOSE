@@ -1,0 +1,4 @@
+../Core/Src/signal_task/signal_task.c:26:6:signal_task_init	16	static
+../Core/Src/signal_task/signal_task.c:53:5:signal_get_output_A	8	static
+../Core/Src/signal_task/signal_task.c:58:5:signal_get_output_B	8	static
+../Core/Src/signal_task/signal_task.c:63:6:signal_adc_xdrdy_callback	16	static

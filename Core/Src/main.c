@@ -18,14 +18,21 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "cmsis_os.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "w5500_task.h"
+#include "hv_task.h"
+#include "signal_task.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
+
+// todo
+// 1) w5500 and ads1246 sync
+// 2) ads1246 dma???
 
 /* USER CODE END PTD */
 
@@ -49,6 +56,7 @@ SPI_HandleTypeDef hspi4;
 
 UART_HandleTypeDef huart1;
 
+osThreadId defaultTaskHandle;
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -62,7 +70,14 @@ static void MX_SPI2_Init(void);
 static void MX_SPI3_Init(void);
 static void MX_SPI4_Init(void);
 static void MX_USART1_UART_Init(void);
+void StartDefaultTask(void const * argument);
+
 /* USER CODE BEGIN PFP */
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+	hv_adc_xdrdy_callback(GPIO_Pin);
+	signal_adc_xdrdy_callback(GPIO_Pin);
+}
 
 /* USER CODE END PFP */
 
@@ -109,6 +124,35 @@ int main(void)
 
   /* USER CODE END 2 */
 
+  /* USER CODE BEGIN RTOS_MUTEX */
+  /* add mutexes, ... */
+  /* USER CODE END RTOS_MUTEX */
+
+  /* USER CODE BEGIN RTOS_SEMAPHORES */
+  /* add semaphores, ... */
+  /* USER CODE END RTOS_SEMAPHORES */
+
+  /* USER CODE BEGIN RTOS_TIMERS */
+  /* start timers, add new ones, ... */
+  /* USER CODE END RTOS_TIMERS */
+
+  /* USER CODE BEGIN RTOS_QUEUES */
+  /* add queues, ... */
+  /* USER CODE END RTOS_QUEUES */
+
+  /* Create the thread(s) */
+  /* definition and creation of defaultTask */
+  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 1024);
+  defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
+
+  /* USER CODE BEGIN RTOS_THREADS */
+  /* add threads, ... */
+  /* USER CODE END RTOS_THREADS */
+
+  /* Start scheduler */
+  osKernelStart();
+
+  /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
@@ -132,7 +176,7 @@ void SystemClock_Config(void)
   /** Configure the main internal regulator output voltage
   */
   __HAL_RCC_PWR_CLK_ENABLE();
-  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE3);
+  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
 
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
@@ -143,7 +187,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
   RCC_OscInitStruct.PLL.PLLM = 8;
-  RCC_OscInitStruct.PLL.PLLN = 90;
+  RCC_OscInitStruct.PLL.PLLN = 180;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
   RCC_OscInitStruct.PLL.PLLQ = 4;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
@@ -164,10 +208,10 @@ void SystemClock_Config(void)
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
-  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
   {
     Error_Handler();
   }
@@ -243,7 +287,7 @@ static void MX_SPI1_Init(void)
   hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi1.Init.NSS = SPI_NSS_SOFT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_8;
   hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -278,10 +322,10 @@ static void MX_SPI2_Init(void)
   hspi2.Init.Mode = SPI_MODE_MASTER;
   hspi2.Init.Direction = SPI_DIRECTION_2LINES;
   hspi2.Init.DataSize = SPI_DATASIZE_8BIT;
-  hspi2.Init.CLKPolarity = SPI_POLARITY_HIGH;
+  hspi2.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi2.Init.CLKPhase = SPI_PHASE_2EDGE;
   hspi2.Init.NSS = SPI_NSS_SOFT;
-  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
+  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_8;
   hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi2.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -316,10 +360,10 @@ static void MX_SPI3_Init(void)
   hspi3.Init.Mode = SPI_MODE_MASTER;
   hspi3.Init.Direction = SPI_DIRECTION_2LINES;
   hspi3.Init.DataSize = SPI_DATASIZE_8BIT;
-  hspi3.Init.CLKPolarity = SPI_POLARITY_HIGH;
+  hspi3.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi3.Init.CLKPhase = SPI_PHASE_2EDGE;
   hspi3.Init.NSS = SPI_NSS_SOFT;
-  hspi3.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
+  hspi3.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_64;
   hspi3.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi3.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi3.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -354,10 +398,10 @@ static void MX_SPI4_Init(void)
   hspi4.Init.Mode = SPI_MODE_MASTER;
   hspi4.Init.Direction = SPI_DIRECTION_2LINES;
   hspi4.Init.DataSize = SPI_DATASIZE_8BIT;
-  hspi4.Init.CLKPolarity = SPI_POLARITY_HIGH;
+  hspi4.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi4.Init.CLKPhase = SPI_PHASE_2EDGE;
   hspi4.Init.NSS = SPI_NSS_SOFT;
-  hspi4.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_8;
+  hspi4.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_128;
   hspi4.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi4.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi4.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -433,11 +477,11 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(ADS1246_CS_A_GPIO_Port, ADS1246_CS_A_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOD, RANEG_A_Pin|RANGE_B_Pin|HV_EN_A_Pin|HV_EN_B_Pin
+  HAL_GPIO_WritePin(GPIOD, SENSITIVITY_A_Pin|SENSITIVITY_B_Pin|HV_EN_A_Pin|HV_EN_B_Pin
                           |HV_POL_A_Pin|HV_POL_B_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(W5500_RST_GPIO_Port, W5500_RST_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(W5500_RESET_GPIO_Port, W5500_RESET_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : ADS1246_XDRDY_B_Pin */
   GPIO_InitStruct.Pin = ADS1246_XDRDY_B_Pin;
@@ -454,16 +498,16 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin : ADS1220_XDRDY_Pin */
   GPIO_InitStruct.Pin = ADS1220_XDRDY_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(ADS1220_XDRDY_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : ADS1220_CS_Pin W5500_CS_Pin */
-  GPIO_InitStruct.Pin = ADS1220_CS_Pin|W5500_CS_Pin;
+  /*Configure GPIO pin : ADS1220_CS_Pin */
+  GPIO_InitStruct.Pin = ADS1220_CS_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+  HAL_GPIO_Init(ADS1220_CS_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : ADS1246_XDRDY_A_Pin */
   GPIO_InitStruct.Pin = ADS1246_XDRDY_A_Pin;
@@ -478,29 +522,84 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(ADS1246_CS_A_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : RANEG_A_Pin RANGE_B_Pin HV_EN_A_Pin HV_EN_B_Pin
+  /*Configure GPIO pins : SENSITIVITY_A_Pin SENSITIVITY_B_Pin HV_EN_A_Pin HV_EN_B_Pin
                            HV_POL_A_Pin HV_POL_B_Pin */
-  GPIO_InitStruct.Pin = RANEG_A_Pin|RANGE_B_Pin|HV_EN_A_Pin|HV_EN_B_Pin
+  GPIO_InitStruct.Pin = SENSITIVITY_A_Pin|SENSITIVITY_B_Pin|HV_EN_A_Pin|HV_EN_B_Pin
                           |HV_POL_A_Pin|HV_POL_B_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : W5500_RST_Pin */
-  GPIO_InitStruct.Pin = W5500_RST_Pin;
+  /*Configure GPIO pins : W5500_RESET_Pin W5500_CS_Pin */
+  GPIO_InitStruct.Pin = W5500_RESET_Pin|W5500_CS_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-  HAL_GPIO_Init(W5500_RST_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI3_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(EXTI3_IRQn);
+
+  HAL_NVIC_SetPriority(EXTI9_5_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
+
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 6, 0);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
+  HAL_NVIC_DisableIRQ(ADS1220_IRQ);
+  HAL_NVIC_DisableIRQ(ADS1246_A_IRQ);
+  HAL_NVIC_DisableIRQ(ADS1246_B_IRQ);
 /* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
 
 /* USER CODE END 4 */
+
+/* USER CODE BEGIN Header_StartDefaultTask */
+/**
+  * @brief  Function implementing the defaultTask thread.
+  * @param  argument: Not used
+  * @retval None
+  */
+/* USER CODE END Header_StartDefaultTask */
+void StartDefaultTask(void const * argument)
+{
+  /* USER CODE BEGIN 5 */
+  /* Infinite loop */
+	signal_task_init();
+	hv_task_init();
+	w5500_task_init();
+	for(;;)
+	{
+		w5500_task_loop();
+	}
+  /* USER CODE END 5 */
+}
+
+/**
+  * @brief  Period elapsed callback in non blocking mode
+  * @note   This function is called  when TIM1 interrupt took place, inside
+  * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
+  * a global variable "uwTick" used as application time base.
+  * @param  htim : TIM handle
+  * @retval None
+  */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  /* USER CODE BEGIN Callback 0 */
+
+  /* USER CODE END Callback 0 */
+  if (htim->Instance == TIM1) {
+    HAL_IncTick();
+  }
+  /* USER CODE BEGIN Callback 1 */
+
+  /* USER CODE END Callback 1 */
+}
 
 /**
   * @brief  This function is executed in case of error occurrence.

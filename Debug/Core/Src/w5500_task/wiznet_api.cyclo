@@ -1,0 +1,7 @@
+../Core/Src/w5500_task/wiznet_api.c:10:6:W5500_Select	1
+../Core/Src/w5500_task/wiznet_api.c:15:6:W5500_Deselect	1
+../Core/Src/w5500_task/wiznet_api.c:20:6:W5500_ReadBuff	1
+../Core/Src/w5500_task/wiznet_api.c:25:6:W5500_WriteBuff	1
+../Core/Src/w5500_task/wiznet_api.c:30:9:W5500_ReadByte	1
+../Core/Src/w5500_task/wiznet_api.c:37:6:W5500_WriteByte	1
+../Core/Src/w5500_task/wiznet_api.c:42:6:W5500_Init	1
