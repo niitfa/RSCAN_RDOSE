@@ -13,6 +13,7 @@
 #include <math.h>
 
 extern SPI_HandleTypeDef ADS1220_SPI;
+extern DAC_HandleTypeDef hdac;
 
 typedef struct
 {
@@ -20,7 +21,11 @@ typedef struct
 	int outputVoltageDivider;
 	double adcRefVoltageNegative;
 	double adcRefVoltagePositive;
-	int k;
+
+	int dacMaxValue;
+	int V_high_max;
+	int k_in;
+	int k_out;
 } hv_task_t;
 
 static hv_task_t task;
@@ -31,7 +36,7 @@ void hv_task_init()
 	task.outputVoltageDivider = 500; //
 	task.adcRefVoltageNegative = 0;
 	task.adcRefVoltagePositive = 2.048;
-	task.k = pow(2, 23) / (task.adcRefVoltagePositive - task.adcRefVoltageNegative) / task.outputVoltageDivider;
+	task.k_in = pow(2, 23) / (task.adcRefVoltagePositive - task.adcRefVoltageNegative) / task.outputVoltageDivider;
 
 
 	// init adc
@@ -47,18 +52,43 @@ void hv_task_init()
 			);
 	ads1220_setup(adc);
 	HAL_NVIC_EnableIRQ(ADS1220_IRQ);
+
+	// dac
+	task.dacMaxValue = (int)round(4095 * 3 / 3.3); // 3723
+	task.V_high_max = 500;
+	task.k_out = 500; //
+	HAL_DAC_Start(&hdac,DAC_CHANNEL_1);
+	HAL_DAC_Start(&hdac,DAC_CHANNEL_2);
 }
 
 int hv_get_output_A()
 {
 	ads1220_t* adc = &task.adc;
-	return ads1220_get_output_A(adc) / task.k;
+	return ads1220_get_output_A(adc) / task.k_in;
 }
 
 int hv_get_output_B()
 {
 	ads1220_t* adc = &task.adc;
-	return ads1220_get_output_B(adc) / task.k;
+	return ads1220_get_output_B(adc) / task.k_in;
+}
+
+void hv_set_output_A(int volt)
+{
+	if(volt >= 0 && volt <= task.V_high_max)
+	{
+		int val = task.dacMaxValue * volt /  task.V_high_max;
+		HAL_DAC_SetValue(&hdac, DAC_CHANNEL_1, DAC_ALIGN_12B_R, (uint32_t)val);
+	}
+}
+
+void hv_set_output_B(int volt)
+{
+	if(volt >= 0 && volt <= task.V_high_max)
+	{
+		int val = task.dacMaxValue * volt /  task.V_high_max;
+		HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2, DAC_ALIGN_12B_R, (uint32_t)val);
+	}
 }
 
 int hv_get_output_temp()

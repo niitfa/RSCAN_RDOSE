@@ -14,6 +14,7 @@
 
 
 #include "tcp_server_rx.h"
+#include "hv_task.h"
 #include <stdint.h>
 #include <string.h>
 #include "main.h"
@@ -85,15 +86,17 @@ void tcp_server_rx_handle()
 		break;
 	case COMMAND_DISABLE_HV_A:
 		HAL_GPIO_WritePin(HV_EN_A_GPIO_Port, HV_EN_A_Pin, 0);
+		hv_set_output_A(0);
 		break;
 	case COMMAND_DISABLE_HV_B:
 		HAL_GPIO_WritePin(HV_EN_B_GPIO_Port, HV_EN_B_Pin, 0);
+		hv_set_output_B(0);
 		break;
 	case COMMAND_SET_VOLTAGE_A:
-		//
+		hv_set_output_A(parameter);
 		break;
 	case COMMAND_SET_VOLTAGE_B:
-		//
+		hv_set_output_B(parameter);
 		break;
 	case COMMAND_SET_HV_POLARITY_A:
 		HAL_GPIO_WritePin(HV_POL_A_GPIO_Port, HV_POL_A_Pin, (uint8_t)parameter);

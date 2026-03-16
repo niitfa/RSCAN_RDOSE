@@ -17,6 +17,10 @@ void hv_task_init();
 // interface
 int hv_get_output_A();
 int hv_get_output_B();
+
+void hv_set_output_A(int volt);
+void hv_set_output_B(int volt);
+
 int hv_get_output_temp();
 void hv_adc_xdrdy_callback(uint16_t GPIO_Pin);
 
