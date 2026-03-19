@@ -41,13 +41,13 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  18 .debug_macro  00026df3  00000000  00000000  00043eb6  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .debug_line   0001da1c  00000000  00000000  0006aca9  2**0
+ 19 .debug_line   0001d900  00000000  00000000  0006aca9  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 20 .debug_str    000ead7b  00000000  00000000  000886c5  2**0
+ 20 .debug_str    000ead7b  00000000  00000000  000885a9  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 21 .debug_frame  00006b44  00000000  00000000  00173440  2**2
+ 21 .debug_frame  00006b44  00000000  00000000  00173324  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 22 .debug_line_str 0000005b  00000000  00000000  00179f84  2**0
+ 22 .debug_line_str 0000005b  00000000  00000000  00179e68  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -1511,9 +1511,9 @@ static void MX_SPI2_Init(void)
  8000f6a:	4b0e      	ldr	r3, [pc, #56]	; (8000fa4 <MX_SPI2_Init+0x64>)
  8000f6c:	f44f 7200 	mov.w	r2, #512	; 0x200
  8000f70:	619a      	str	r2, [r3, #24]
-  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_8;
+  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_64;
  8000f72:	4b0c      	ldr	r3, [pc, #48]	; (8000fa4 <MX_SPI2_Init+0x64>)
- 8000f74:	2210      	movs	r2, #16
+ 8000f74:	2228      	movs	r2, #40	; 0x28
  8000f76:	61da      	str	r2, [r3, #28]
   hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
  8000f78:	4b0a      	ldr	r3, [pc, #40]	; (8000fa4 <MX_SPI2_Init+0x64>)
@@ -1593,9 +1593,9 @@ static void MX_SPI3_Init(void)
  8000fd6:	4b0e      	ldr	r3, [pc, #56]	; (8001010 <MX_SPI3_Init+0x64>)
  8000fd8:	f44f 7200 	mov.w	r2, #512	; 0x200
  8000fdc:	619a      	str	r2, [r3, #24]
-  hspi3.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_64;
+  hspi3.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_8;
  8000fde:	4b0c      	ldr	r3, [pc, #48]	; (8001010 <MX_SPI3_Init+0x64>)
- 8000fe0:	2228      	movs	r2, #40	; 0x28
+ 8000fe0:	2210      	movs	r2, #16
  8000fe2:	61da      	str	r2, [r3, #28]
   hspi3.Init.FirstBit = SPI_FIRSTBIT_MSB;
  8000fe4:	4b0a      	ldr	r3, [pc, #40]	; (8001010 <MX_SPI3_Init+0x64>)
@@ -1878,14 +1878,14 @@ static void MX_GPIO_Init(void)
  8001180:	f003 fd88 	bl	8004c94 <HAL_GPIO_WritePin>
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, ADS1220_CS_Pin|W5500_CS_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOB, ADS1246_CS_A_Pin|W5500_CS_Pin, GPIO_PIN_SET);
  8001184:	2201      	movs	r2, #1
  8001186:	f44f 5184 	mov.w	r1, #4224	; 0x1080
  800118a:	4856      	ldr	r0, [pc, #344]	; (80012e4 <MX_GPIO_Init+0x20c>)
  800118c:	f003 fd82 	bl	8004c94 <HAL_GPIO_WritePin>
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(ADS1246_CS_A_GPIO_Port, ADS1246_CS_A_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(ADS1220_CS_GPIO_Port, ADS1220_CS_Pin, GPIO_PIN_SET);
  8001190:	2201      	movs	r2, #1
  8001192:	f44f 7100 	mov.w	r1, #512	; 0x200
  8001196:	4854      	ldr	r0, [pc, #336]	; (80012e8 <MX_GPIO_Init+0x210>)
@@ -1941,8 +1941,8 @@ static void MX_GPIO_Init(void)
  80011e0:	483f      	ldr	r0, [pc, #252]	; (80012e0 <MX_GPIO_Init+0x208>)
  80011e2:	f003 fb93 	bl	800490c <HAL_GPIO_Init>
 
-  /*Configure GPIO pin : ADS1220_XDRDY_Pin */
-  GPIO_InitStruct.Pin = ADS1220_XDRDY_Pin;
+  /*Configure GPIO pin : ADS1246_XDRDY_A_Pin */
+  GPIO_InitStruct.Pin = ADS1246_XDRDY_A_Pin;
  80011e6:	f44f 6300 	mov.w	r3, #2048	; 0x800
  80011ea:	617b      	str	r3, [r7, #20]
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
@@ -1951,14 +1951,14 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
  80011f2:	2300      	movs	r3, #0
  80011f4:	61fb      	str	r3, [r7, #28]
-  HAL_GPIO_Init(ADS1220_XDRDY_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(ADS1246_XDRDY_A_GPIO_Port, &GPIO_InitStruct);
  80011f6:	f107 0314 	add.w	r3, r7, #20
  80011fa:	4619      	mov	r1, r3
  80011fc:	4839      	ldr	r0, [pc, #228]	; (80012e4 <MX_GPIO_Init+0x20c>)
  80011fe:	f003 fb85 	bl	800490c <HAL_GPIO_Init>
 
-  /*Configure GPIO pin : ADS1220_CS_Pin */
-  GPIO_InitStruct.Pin = ADS1220_CS_Pin;
+  /*Configure GPIO pin : ADS1246_CS_A_Pin */
+  GPIO_InitStruct.Pin = ADS1246_CS_A_Pin;
  8001202:	f44f 5380 	mov.w	r3, #4096	; 0x1000
  8001206:	617b      	str	r3, [r7, #20]
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -1970,14 +1970,14 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
  8001210:	2302      	movs	r3, #2
  8001212:	623b      	str	r3, [r7, #32]
-  HAL_GPIO_Init(ADS1220_CS_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(ADS1246_CS_A_GPIO_Port, &GPIO_InitStruct);
  8001214:	f107 0314 	add.w	r3, r7, #20
  8001218:	4619      	mov	r1, r3
  800121a:	4832      	ldr	r0, [pc, #200]	; (80012e4 <MX_GPIO_Init+0x20c>)
  800121c:	f003 fb76 	bl	800490c <HAL_GPIO_Init>
 
-  /*Configure GPIO pin : ADS1246_XDRDY_A_Pin */
-  GPIO_InitStruct.Pin = ADS1246_XDRDY_A_Pin;
+  /*Configure GPIO pin : ADS1220_XDRDY_Pin */
+  GPIO_InitStruct.Pin = ADS1220_XDRDY_Pin;
  8001220:	f44f 7380 	mov.w	r3, #256	; 0x100
  8001224:	617b      	str	r3, [r7, #20]
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
@@ -1986,14 +1986,14 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
  800122c:	2300      	movs	r3, #0
  800122e:	61fb      	str	r3, [r7, #28]
-  HAL_GPIO_Init(ADS1246_XDRDY_A_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(ADS1220_XDRDY_GPIO_Port, &GPIO_InitStruct);
  8001230:	f107 0314 	add.w	r3, r7, #20
  8001234:	4619      	mov	r1, r3
  8001236:	482c      	ldr	r0, [pc, #176]	; (80012e8 <MX_GPIO_Init+0x210>)
  8001238:	f003 fb68 	bl	800490c <HAL_GPIO_Init>
 
-  /*Configure GPIO pin : ADS1246_CS_A_Pin */
-  GPIO_InitStruct.Pin = ADS1246_CS_A_Pin;
+  /*Configure GPIO pin : ADS1220_CS_Pin */
+  GPIO_InitStruct.Pin = ADS1220_CS_Pin;
  800123c:	f44f 7300 	mov.w	r3, #512	; 0x200
  8001240:	617b      	str	r3, [r7, #20]
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -2005,7 +2005,7 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
  800124a:	2302      	movs	r3, #2
  800124c:	623b      	str	r3, [r7, #32]
-  HAL_GPIO_Init(ADS1246_CS_A_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(ADS1220_CS_GPIO_Port, &GPIO_InitStruct);
  800124e:	f107 0314 	add.w	r3, r7, #20
  8001252:	4619      	mov	r1, r3
  8001254:	4824      	ldr	r0, [pc, #144]	; (80012e8 <MX_GPIO_Init+0x210>)
@@ -2984,7 +2984,7 @@ void EXTI9_5_IRQHandler(void)
   /* USER CODE BEGIN EXTI9_5_IRQn 0 */
 
   /* USER CODE END EXTI9_5_IRQn 0 */
-  HAL_GPIO_EXTI_IRQHandler(ADS1246_XDRDY_A_Pin);
+  HAL_GPIO_EXTI_IRQHandler(ADS1220_XDRDY_Pin);
  80017a6:	f44f 7080 	mov.w	r0, #256	; 0x100
  80017aa:	f003 fa8d 	bl	8004cc8 <HAL_GPIO_EXTI_IRQHandler>
   /* USER CODE BEGIN EXTI9_5_IRQn 1 */
@@ -3031,7 +3031,7 @@ void EXTI15_10_IRQHandler(void)
   /* USER CODE BEGIN EXTI15_10_IRQn 0 */
 
   /* USER CODE END EXTI15_10_IRQn 0 */
-  HAL_GPIO_EXTI_IRQHandler(ADS1220_XDRDY_Pin);
+  HAL_GPIO_EXTI_IRQHandler(ADS1246_XDRDY_A_Pin);
  80017cc:	f44f 6000 	mov.w	r0, #2048	; 0x800
  80017d0:	f003 fa7a 	bl	8004cc8 <HAL_GPIO_EXTI_IRQHandler>
   /* USER CODE BEGIN EXTI15_10_IRQn 1 */
@@ -4395,12 +4395,12 @@ void hv_task_init()
  80020b4:	6878      	ldr	r0, [r7, #4]
  80020b6:	f7ff fc0b 	bl	80018d0 <ads1220_set_spi>
 	ads1220_set_cs(adc, ADS1220_CS_GPIO_Port, ADS1220_CS_Pin);
- 80020ba:	f44f 5280 	mov.w	r2, #4096	; 0x1000
+ 80020ba:	f44f 7200 	mov.w	r2, #512	; 0x200
  80020be:	4921      	ldr	r1, [pc, #132]	; (8002144 <hv_task_init+0x11c>)
  80020c0:	6878      	ldr	r0, [r7, #4]
  80020c2:	f7ff fc26 	bl	8001912 <ads1220_set_cs>
 	ads1220_set_xdrdy(adc, ADS1220_XDRDY_GPIO_Port, ADS1220_XDRDY_Pin);
- 80020c6:	f44f 6200 	mov.w	r2, #2048	; 0x800
+ 80020c6:	f44f 7280 	mov.w	r2, #256	; 0x100
  80020ca:	491e      	ldr	r1, [pc, #120]	; (8002144 <hv_task_init+0x11c>)
  80020cc:	6878      	ldr	r0, [r7, #4]
  80020ce:	f7ff fc0d 	bl	80018ec <ads1220_set_xdrdy>
@@ -4456,8 +4456,8 @@ void hv_task_init()
  8002134:	4000624d 	.word	0x4000624d
  8002138:	20001358 	.word	0x20001358
  800213c:	41600000 	.word	0x41600000
- 8002140:	200011b8 	.word	0x200011b8
- 8002144:	40020400 	.word	0x40020400
+ 8002140:	20001210 	.word	0x20001210
+ 8002144:	40020800 	.word	0x40020800
  8002148:	2000114c 	.word	0x2000114c
 
 0800214c <hv_get_output_A>:
@@ -5246,12 +5246,12 @@ void signal_task_init()
  8002644:	6878      	ldr	r0, [r7, #4]
  8002646:	f7ff fe7b 	bl	8002340 <ads1246_set_spi>
 	ads1246_set_cs_pin(adc, ADS1246_CS_A_GPIO_Port, ADS1246_CS_A_Pin);
- 800264a:	f44f 7200 	mov.w	r2, #512	; 0x200
+ 800264a:	f44f 5280 	mov.w	r2, #4096	; 0x1000
  800264e:	4926      	ldr	r1, [pc, #152]	; (80026e8 <signal_task_init+0xc0>)
  8002650:	6878      	ldr	r0, [r7, #4]
  8002652:	f7ff fe83 	bl	800235c <ads1246_set_cs_pin>
 	ads1246_set_xdrdy_pin(adc, ADS1246_XDRDY_A_GPIO_Port, ADS1246_XDRDY_A_Pin);
- 8002656:	f44f 7280 	mov.w	r2, #256	; 0x100
+ 8002656:	f44f 6200 	mov.w	r2, #2048	; 0x800
  800265a:	4923      	ldr	r1, [pc, #140]	; (80026e8 <signal_task_init+0xc0>)
  800265c:	6878      	ldr	r0, [r7, #4]
  800265e:	f7ff fe90 	bl	8002382 <ads1246_set_xdrdy_pin>
@@ -5314,8 +5314,8 @@ void signal_task_init()
  80026d4:	4000624d 	.word	0x4000624d
 	...
  80026e0:	200013c8 	.word	0x200013c8
- 80026e4:	20001210 	.word	0x20001210
- 80026e8:	40020800 	.word	0x40020800
+ 80026e4:	200011b8 	.word	0x200011b8
+ 80026e8:	40020400 	.word	0x40020400
  80026ec:	20001400 	.word	0x20001400
  80026f0:	20001268 	.word	0x20001268
  80026f4:	40021000 	.word	0x40021000

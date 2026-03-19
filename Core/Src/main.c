@@ -325,7 +325,7 @@ static void MX_SPI2_Init(void)
   hspi2.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi2.Init.CLKPhase = SPI_PHASE_2EDGE;
   hspi2.Init.NSS = SPI_NSS_SOFT;
-  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_8;
+  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_64;
   hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi2.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -363,7 +363,7 @@ static void MX_SPI3_Init(void)
   hspi3.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi3.Init.CLKPhase = SPI_PHASE_2EDGE;
   hspi3.Init.NSS = SPI_NSS_SOFT;
-  hspi3.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_64;
+  hspi3.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_8;
   hspi3.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi3.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi3.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -471,10 +471,10 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(ADS1246_CS_B_GPIO_Port, ADS1246_CS_B_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, ADS1220_CS_Pin|W5500_CS_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOB, ADS1246_CS_A_Pin|W5500_CS_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(ADS1246_CS_A_GPIO_Port, ADS1246_CS_A_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(ADS1220_CS_GPIO_Port, ADS1220_CS_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOD, SENSITIVITY_A_Pin|SENSITIVITY_B_Pin|HV_EN_A_Pin|HV_EN_B_Pin
@@ -496,19 +496,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(ADS1246_CS_B_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : ADS1220_XDRDY_Pin */
-  GPIO_InitStruct.Pin = ADS1220_XDRDY_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(ADS1220_XDRDY_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : ADS1220_CS_Pin */
-  GPIO_InitStruct.Pin = ADS1220_CS_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-  HAL_GPIO_Init(ADS1220_CS_GPIO_Port, &GPIO_InitStruct);
-
   /*Configure GPIO pin : ADS1246_XDRDY_A_Pin */
   GPIO_InitStruct.Pin = ADS1246_XDRDY_A_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
@@ -521,6 +508,19 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(ADS1246_CS_A_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : ADS1220_XDRDY_Pin */
+  GPIO_InitStruct.Pin = ADS1220_XDRDY_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(ADS1220_XDRDY_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : ADS1220_CS_Pin */
+  GPIO_InitStruct.Pin = ADS1220_CS_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  HAL_GPIO_Init(ADS1220_CS_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : SENSITIVITY_A_Pin SENSITIVITY_B_Pin HV_EN_A_Pin HV_EN_B_Pin
                            HV_POL_A_Pin HV_POL_B_Pin */
