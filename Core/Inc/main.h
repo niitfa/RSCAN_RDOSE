@@ -96,10 +96,10 @@ void Error_Handler(void);
 /* USER CODE BEGIN Private defines */
 
 #define ADS1220_SPI hspi3
-#define ADS1220_IRQ (IRQn_Type)EXTI15_10_IRQn
+#define ADS1220_IRQ (IRQn_Type)EXTI9_5_IRQn
 
 #define ADS1246_A_SPI hspi2
-#define ADS1246_A_IRQ (IRQn_Type)EXTI9_5_IRQn
+#define ADS1246_A_IRQ (IRQn_Type)EXTI15_10_IRQn
 
 #define ADS1246_B_SPI hspi4
 #define ADS1246_B_IRQ (IRQn_Type)EXTI3_IRQn
