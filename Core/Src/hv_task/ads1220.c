@@ -233,8 +233,8 @@ static void read_dout(ads1220_t* self)
 	uint8_t rxBytes [kBufferSizeBytes];
 
 	uint8_t txBytes [kBufferSizeBytes];
-	uint8_t cr0_chA = (self->gain << 1) | 0b00000000;
-	uint8_t cr0_chB = (self->gain << 1) | 0b01010000;
+	uint8_t cr0_chA = (self->gain << 1) | 0b01010000;
+	uint8_t cr0_chB = (self->gain << 1) | 0b00000000;
 	uint8_t cr1_temp = (self->dataRate << 5) | 0b00001110;
 	uint8_t cr1_ch =  (self->dataRate << 5) |0b00001100;
 	uint8_t wreg = 0b01000001;

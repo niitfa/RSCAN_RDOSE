@@ -9,11 +9,11 @@
 #include <string.h>
 #include <math.h>
 
-static uint8_t CMD_WAKEUP 	= 0x00;
-static uint8_t CMD_NOP 		= 0xFF;
-static uint8_t CMD_RDATA 	= 0x12;
-static uint8_t CMD_WREG 	= 0x40;
-static uint8_t REG_SYS0 	= 0x03;
+static const uint8_t CMD_WAKEUP 	= 0x00;
+static const uint8_t CMD_NOP 		= 0xFF;
+static const uint8_t CMD_RDATA 	= 0x12;
+static const uint8_t CMD_WREG 	= 0x40;
+static const uint8_t REG_SYS0 	= 0x03;
 
 #define ADC_ADS1246_SPI_TIMEOUT 10
 
@@ -89,8 +89,11 @@ void ads1246_setup(ads1246_t* self)
 
 void ads1246_update(ads1246_t* self)
 {
+	static const uint8_t tx[4] = {CMD_NOP, CMD_NOP, CMD_NOP, CMD_RDATA};
+
 	spi_select(self);
-	HAL_SPI_Receive_DMA(self->hspi, self->rxBuff, ADS1246_RX_BUFF_SIZE);
+	//HAL_SPI_Receive_DMA(self->hspi, self->rxBuff, ADS1246_RX_BUFF_SIZE);
+	HAL_SPI_TransmitReceive_DMA(self->hspi, (uint8_t*)tx, self->rxBuff, ADS1246_RX_BUFF_SIZE);
 
 	/*const uint8_t kDataSizeBytes = 3;
 	const uint8_t kBufferSizeBytes = 4;
@@ -116,9 +119,9 @@ void ads1246_spi_dma_cplt(ads1246_t *self)
 	spi_deselect(self);
 
 	memset(((uint8_t*)&self->lastOutputValue) + 0, 0, 4);
-	memcpy(((uint8_t*)&self->lastOutputValue) + 0, self->rxBuff + 2, 1);
-	memcpy(((uint8_t*)&self->lastOutputValue) + 1, self->rxBuff + 1, 1);
-	memcpy(((uint8_t*)&self->lastOutputValue) + 2, self->rxBuff + 0, 1);
+	memcpy(((uint8_t*)&self->lastOutputValue) + 0, self->rxBuff + 3, 1);
+	memcpy(((uint8_t*)&self->lastOutputValue) + 1, self->rxBuff + 2, 1);
+	memcpy(((uint8_t*)&self->lastOutputValue) + 2, self->rxBuff + 1, 1);
 	check_negative_24_to_32((int32_t*)&self->lastOutputValue);
 }
 

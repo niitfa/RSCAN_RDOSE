@@ -10,7 +10,7 @@
 
 #include "stm32f4xx_hal.h"
 
-#define ADS1246_RX_BUFF_SIZE 3
+#define ADS1246_RX_BUFF_SIZE 4
 
 typedef struct
 {
