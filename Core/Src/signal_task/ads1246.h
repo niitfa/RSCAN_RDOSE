@@ -11,6 +11,7 @@
 #include "stm32f4xx_hal.h"
 
 #define ADS1246_RX_BUFF_SIZE 4
+#define ADS1246_TX_BUFF_SIZE 4
 
 typedef struct
 {
@@ -25,6 +26,7 @@ typedef struct
 	int32_t maxOutputValue;
 	uint8_t SYS0_conf;
 	uint8_t rxBuff[ADS1246_RX_BUFF_SIZE];
+	uint8_t txBuff[ADS1246_TX_BUFF_SIZE];
 	uint8_t valueBuff[4];
 } ads1246_t;
 

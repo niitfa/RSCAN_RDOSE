@@ -44,6 +44,11 @@ void ads1246_init(ads1246_t* self)
 	uint8_t PGA = 0b000;
 	uint8_t DR = 0b0010; // was 0b0010
 	self->SYS0_conf = DR | (PGA << 4);
+
+	self->txBuff[0] = CMD_RDATA;
+	self->txBuff[1] = CMD_NOP;
+	self->txBuff[2] = CMD_NOP;
+	self->txBuff[3] = CMD_NOP;
 }
 
 
@@ -89,11 +94,9 @@ void ads1246_setup(ads1246_t* self)
 
 void ads1246_update(ads1246_t* self)
 {
-	static const uint8_t tx[4] = {CMD_NOP, CMD_NOP, CMD_NOP, CMD_RDATA};
-
 	spi_select(self);
 	//HAL_SPI_Receive_DMA(self->hspi, self->rxBuff, ADS1246_RX_BUFF_SIZE);
-	HAL_SPI_TransmitReceive_DMA(self->hspi, (uint8_t*)tx, self->rxBuff, ADS1246_RX_BUFF_SIZE);
+	HAL_SPI_TransmitReceive_DMA(self->hspi, self->txBuff, self->rxBuff, ADS1246_RX_BUFF_SIZE);
 
 	/*const uint8_t kDataSizeBytes = 3;
 	const uint8_t kBufferSizeBytes = 4;
