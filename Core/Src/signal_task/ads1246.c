@@ -89,7 +89,10 @@ void ads1246_setup(ads1246_t* self)
 
 void ads1246_update(ads1246_t* self)
 {
-	const uint8_t kDataSizeBytes = 3;
+	spi_select(self);
+	HAL_SPI_Receive_DMA(self->hspi, self->rxBuff, ADS1246_RX_BUFF_SIZE);
+
+	/*const uint8_t kDataSizeBytes = 3;
 	const uint8_t kBufferSizeBytes = 4;
 	uint8_t rxBytes [kBufferSizeBytes];
 
@@ -105,7 +108,18 @@ void ads1246_update(ads1246_t* self)
 	spi_deselect(self);
 	check_negative_24_to_32((int32_t*)rxBytes);
 	self->lastOutputValue = *(int32_t*)rxBytes;
+	spi_deselect(self); */
+}
+
+void ads1246_spi_dma_cplt(ads1246_t *self)
+{
 	spi_deselect(self);
+
+	memset(((uint8_t*)&self->lastOutputValue) + 0, 0, 4);
+	memcpy(((uint8_t*)&self->lastOutputValue) + 0, self->rxBuff + 2, 1);
+	memcpy(((uint8_t*)&self->lastOutputValue) + 1, self->rxBuff + 1, 1);
+	memcpy(((uint8_t*)&self->lastOutputValue) + 2, self->rxBuff + 0, 1);
+	check_negative_24_to_32((int32_t*)&self->lastOutputValue);
 }
 
 int ads1246_get_output(ads1246_t *self)

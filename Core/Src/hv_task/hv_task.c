@@ -51,7 +51,7 @@ void hv_task_init()
 			task.adcRefVoltagePositive
 			);
 	ads1220_setup(adc);
-	HAL_NVIC_EnableIRQ(ADS1220_IRQ);
+	HAL_NVIC_EnableIRQ(ADS1220_XDRDY_EXTI_IRQn);
 
 	// dac
 	task.dacMaxValue = (int)round(4095 * 3 / 3.3); // 3723
@@ -59,6 +59,9 @@ void hv_task_init()
 	task.k_out = 500; //
 	HAL_DAC_Start(&hdac,DAC_CHANNEL_1);
 	HAL_DAC_Start(&hdac,DAC_CHANNEL_2);
+
+	hv_set_output_A(0);
+	hv_set_output_B(0);
 }
 
 int hv_get_output_A()

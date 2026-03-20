@@ -69,8 +69,8 @@ all: main-build
 main-build: RSCAN_RDOSE.elf secondary-outputs
 
 # Tool invocations
-RSCAN_RDOSE.elf RSCAN_RDOSE.map: $(OBJS) $(USER_OBJS) C:\Users\Kirill\Documents\Github\RSCAN_RDOSE\STM32F429ZGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "RSCAN_RDOSE.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\Kirill\Documents\Github\RSCAN_RDOSE\STM32F429ZGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="RSCAN_RDOSE.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+RSCAN_RDOSE.elf RSCAN_RDOSE.map: $(OBJS) $(USER_OBJS) C:\Users\Kirill\Documents\GitHub\RSCAN_RDOSE\STM32F429ZGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "RSCAN_RDOSE.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\Kirill\Documents\GitHub\RSCAN_RDOSE\STM32F429ZGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="RSCAN_RDOSE.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

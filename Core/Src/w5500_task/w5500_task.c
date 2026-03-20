@@ -50,7 +50,7 @@ void w5500_task_init()
 	memset(&data, 0, sizeof(data));
 
 	// set ip
-	uint8_t _ip[] = {192, 168, 2, 12};
+	uint8_t _ip[] = {192, 168, 1, 12};
 	data.port = 22250;
 	data.socket = 0;
 	memcpy(data.ip, _ip, 4);

@@ -7,7 +7,6 @@
 
 #include "signal_task.h"
 #include "main.h"
-#include "ads1246.h"
 
 #include <string.h>
 #include <math.h>
@@ -45,9 +44,9 @@ void signal_task_init()
 	ads1246_setup(adc);
 
 	// enable irq
-	HAL_NVIC_EnableIRQ(ADS1246_A_IRQ);
+	HAL_NVIC_EnableIRQ(ADS1246_XDRDY_A_EXTI_IRQn);
 	HAL_Delay(25);
-	HAL_NVIC_EnableIRQ(ADS1246_B_IRQ);
+	HAL_NVIC_EnableIRQ(ADS1246_XDRDY_B_EXTI_IRQn);
 }
 
 int signal_get_output_A()
@@ -69,6 +68,18 @@ void signal_adc_xdrdy_callback(uint16_t GPIO_Pin)
 	else if (GPIO_Pin == ads1246_get_xdrdy_pin(&task.adc_B))
 	{
 		ads1246_update(&task.adc_B);
+	}
+}
+
+void signal_adc_spi_dma_callback(SPI_HandleTypeDef* hspi)
+{
+	if (hspi == &ADS1246_A_SPI)
+	{
+	  ads1246_spi_dma_cplt(&task.adc_A);
+	}
+	else if (hspi == &ADS1246_B_SPI)
+	{
+	  ads1246_spi_dma_cplt(&task.adc_B);
 	}
 }
 

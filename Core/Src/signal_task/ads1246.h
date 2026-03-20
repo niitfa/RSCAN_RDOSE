@@ -10,6 +10,8 @@
 
 #include "stm32f4xx_hal.h"
 
+#define ADS1246_RX_BUFF_SIZE 3
+
 typedef struct
 {
 	SPI_HandleTypeDef* hspi;
@@ -22,7 +24,8 @@ typedef struct
 	int32_t lastOutputValue;
 	int32_t maxOutputValue;
 	uint8_t SYS0_conf;
-
+	uint8_t rxBuff[ADS1246_RX_BUFF_SIZE];
+	uint8_t valueBuff[4];
 } ads1246_t;
 
 void ads1246_init(ads1246_t* self);
@@ -32,6 +35,7 @@ void ads1246_set_xdrdy_pin(ads1246_t* self, GPIO_TypeDef* port, uint16_t pin);
 void ads1246_set_reference_voltage(ads1246_t* self, double negative, double positive);
 void ads1246_setup(ads1246_t* self);
 void ads1246_update(ads1246_t* self);
+void ads1246_spi_dma_cplt(ads1246_t *self);
 int ads1246_get_output(ads1246_t *self);
 uint16_t ads1246_get_xdrdy_pin(ads1246_t *self);
 
