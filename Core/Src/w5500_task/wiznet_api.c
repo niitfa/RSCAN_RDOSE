@@ -1,8 +1,5 @@
-/*
- * wiznet_api.c
- *
- *  Created on: Aug 8, 2024
- *      Author: Kirill
+/**
+ * @file wiznet_api.c
  */
 
 #include "wiznet_api.h"

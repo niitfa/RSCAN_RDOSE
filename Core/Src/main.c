@@ -33,6 +33,7 @@
 // todo
 // 1) w5500 and ads1246 sync
 // 2) ads1246 dma???
+// 3) uart модуль дописать и отладить (как в RSCAN 1DWT)
 
 /* USER CODE END PTD */
 

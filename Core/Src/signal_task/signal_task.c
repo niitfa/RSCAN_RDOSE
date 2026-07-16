@@ -1,8 +1,8 @@
-/*
- * signal_task.c
- *
- *  Created on: Mar 16, 2026
- *      Author: Kirill
+/**
+ * @file signal_task.c
+ * @brief Файл с определениями функций и структуры, отвечающих за инициализацию
+ * АЦП, обрабатывающих сигналы камер каналов A и B, и сбор
+ * данных с них
  */
 
 #include "signal_task.h"
@@ -11,15 +11,21 @@
 #include <string.h>
 #include <math.h>
 
-extern SPI_HandleTypeDef ADS1246_A_SPI;
-extern SPI_HandleTypeDef ADS1246_B_SPI;
-
+extern SPI_HandleTypeDef ADS1246_A_SPI; ///< SPI АЦП камеры канала A
+extern SPI_HandleTypeDef ADS1246_B_SPI; ///< SPI АЦП камеры канала B
+/**
+ * @brief Основная структура модуля, содержащая
+ * данные об задании обработки сигналов в АЦП камер
+ */
 typedef struct
 {
 	ads1246_t adc_A;
 	ads1246_t adc_B;
 } signal_task_t;
-
+/**
+ * @brief Единственный экземпляр структуры signal_task_t.
+ * Работа всех определенных в файле функций происходит только с ней
+ */
 static signal_task_t task;
 
 void signal_task_init()

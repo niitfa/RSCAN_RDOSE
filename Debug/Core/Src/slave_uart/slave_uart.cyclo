@@ -1,7 +1,0 @@
-../Core/Src/slave_uart/slave_uart.c:34:6:slave_uart_init	1
-../Core/Src/slave_uart/slave_uart.c:40:10:slave_uart_rx_buffer	1
-../Core/Src/slave_uart/slave_uart.c:45:6:slave_uart_clear_rx_buffer	1
-../Core/Src/slave_uart/slave_uart.c:50:6:phantom_uart_handle_rx_message	1
-../Core/Src/slave_uart/slave_uart.c:114:17:slave_uart_tx_buffer	1
-../Core/Src/slave_uart/slave_uart.c:119:13:slave_uart_clear_tx_buffer	1
-../Core/Src/slave_uart/slave_uart.c:124:13:slave_uart_transmit	2

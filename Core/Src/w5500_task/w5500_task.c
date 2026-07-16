@@ -1,64 +1,109 @@
-/*
- * w5500_task.c
- *
- *  Created on: Dec 23, 2025
- *      Author: Kirill
+/**
+ * @file w5500_task.c
+ * @brief Файл с определением структуры и функций задания tcp-сервера на базе чипа w5500
  */
-
-// 4) client
-
-
 #include "w5500_task.h"
 #include "cmsis_os.h"
 #include <string.h>
-
+/**
+ * @brief Получение кода статуса сокета. Используется только внутри w5500_task_loop().
+ * @return Код статуса сокета
+ * @see w5500_task_loop() Sn_SR
+ */
 static uint8_t _status();
+/**
+ * @brief Открытие сокета. Используется только внутри w5500_task_loop().
+ * @retval 1 Успех
+ * @retval 0 Ошибка
+ * @see w5500_task_loop()
+ */
 static int8_t _socket();
+/**
+ * @brief Прослушивание сокета. Используется только внутри w5500_task_loop().
+ * @retval 1 Успех
+ * @retval 0 Ошибка
+ * @see w5500_task_loop()
+ */
 static int8_t _listen();
+/**
+ * @brief Отключение от сокета. Используется только внутри w5500_task_loop().
+ * @retval 1 Успех. Единственное возвращаемое значение
+ * @see w5500_task_loop()
+ */
 static int8_t _disconnect();
+/**
+ * @brief Закрытие сокета. Используется только внутри w5500_task_loop().
+ * @retval 1 Успех. Единственное возвращаемое значение
+ * @see w5500_task_loop()
+ */
 static int8_t _close();
+/**
+ * @brief Задержка. Используется только внутри w5500_task_loop().
+ * @see w5500_task_loop()
+ */
 static void _delay();
+/**
+ * @brief Устанавливает длинную задержку в конце данного цикла.
+ * Используется только внутри w5500_task_loop().
+ * @see w5500_task_loop()
+ */
 static void _set_long_delay();
+/**
+ * @brief Устанавливает короткую задержку в конце данного цикла.
+ * Используется только внутри w5500_task_loop().
+ * @see w5500_task_loop()
+ */
 static void _set_short_delay();
-
+/**
+ * @brief !!! Функция решила проблему стабильности работы клиент-серверного обмена на этапе разработки.
+ * Конкретное назначение до конца не прояснено. При решении удалить ее вызов необходима повторная тщательная отладка.
+ * Используется только внутри w5500_task_loop().
+ * @see w5500_task_loop()
+ */
 static void _check_connected();
+/**
+ * @brief Прием сообщения от клиента. Используется только внутри w5500_task_loop().
+ * @see w5500_task_loop()
+ */
 static int _receive();
+/**
+ * @brief Отправка сообщения клиенту. Используется только внутри w5500_task_loop().
+ * @see w5500_task_loop()
+ */
 static int _send();
-
+/**
+ * @brief Выбор IP и порта для инициализации w5500. Используется только внутри w5500_init().
+ * @see w5500_init()
+ */
+static void _select_ip_and_port();
+/**
+ * @brief Структура задания tcp-сервера
+ */
 typedef struct
 {
-	uint8_t ip[4];
-	uint16_t port;
-	uint16_t socket;
-	uint8_t status;
-
-	TickType_t xLastWakeTime;
-	TickType_t xDelayMs;
-
-	uint16_t shortDelayMs;
-	uint16_t longDelayMs;
-
-	// debug
-	uint8_t rx_buff[64];
-	uint8_t tx_buff[64];
+	uint8_t ip[4]; ///< Буфер для хранения выбранного IP
+	uint16_t port; ///< Поле для хранения выбранного порта
+	uint16_t socket; ///< Номер сокета, по умолчанию 0
+	TickType_t xLastWakeTime; ///< Хранит время пробуждения цикла после последней задержки, мс
+	TickType_t xDelayMs; ///< Величина выбранной задержки, мс
+	uint16_t shortDelayMs; ///< Величина коротой задержки, мс
+	uint16_t longDelayMs; ///< Величина длинной задержки, мс
+	uint8_t connected; ///< Флаг наличия соединения с клиентом
 } w5500_task_t;
-
+/**
+ * @brief Единственный экземпляр структуры w5500_task_t.
+ * Работа всех определенных в файле функций происходит только с ней
+ */
 static w5500_task_t data;
 
 void w5500_task_init()
 {
 	memset(&data, 0, sizeof(data));
-
-	// set ip
-	uint8_t _ip[] = {192, 168, 1, 12};
-	data.port = 22250;
+	_select_ip_and_port();
 	data.socket = 0;
-	memcpy(data.ip, _ip, 4);
-	W5500_Init(_ip[0], _ip[1], _ip[2], _ip[3]);
-
+	W5500_Init(data.ip[0], data.ip[1], data.ip[2], data.ip[3]);
 	data.shortDelayMs = 50;
 	data.longDelayMs  = 200;
-
 	tcp_server_rx_init();
 	tcp_server_tx_init();
 }
@@ -66,20 +111,22 @@ void w5500_task_init()
 void w5500_task_loop()
 {
 	_set_long_delay();
+	data.connected = 0;
 	switch(_status()) {
 	case SOCK_ESTABLISHED:
 		 _check_connected();
 		 int recv = _receive();
+		 data.connected = (recv > 0);
 		 if(recv < 0)
 		 {
 			 _disconnect();
 			 _close();
 		 }
-		 else if (recv > 0) // size
+		 else if (recv > 0)
 		 {
 			tcp_server_rx_handle();
 			tcp_server_tx_update();
-			 _send();
+			data.connected = (_send() > 0);
 		 }
 		 _set_short_delay();
 		break;
@@ -100,6 +147,7 @@ void w5500_task_loop()
 		break;
 	case SOCK_INIT:
 		_listen();
+		break;
 	default:
 		break;
 	}
@@ -114,9 +162,14 @@ int w5500_task_get_ip()
 	return ret;
 }
 
-uint8_t w5500_get_socket_status()
+int w5500_task_get_port()
 {
-	return _status();
+	return data.port;
+}
+
+uint8_t w5500_task_is_connected()
+{
+	return data.connected;
 }
 
 static uint8_t _status()
@@ -176,4 +229,10 @@ static int _send()
 	return send(data.socket, tcp_server_tx_get(), tcp_server_tx_size());
 }
 
-
+static void _select_ip_and_port()
+{
+	uint8_t _ip[] = {192, 168, 1, 12};
+	data.port = 22250;
+	data.socket = 0;
+	memcpy(data.ip, _ip, 4);
+}

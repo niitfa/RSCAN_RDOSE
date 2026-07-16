@@ -1,8 +1,13 @@
-/*
- * trc_server_tx.c
- *
- *  Created on: Dec 25, 2025
- *      Author: Kirill
+/**
+ * @file tcp_server_tx.c
+ * @brief Файл содержит информацию об исходящем пакете и
+ * определения соответствующих функций и структур данных
+ * @details Для адаптации этого модуля к другим проектам
+ * 1) Изменить размер буфера TCP_TX_BUFF_SIZE
+ * 2) Изменить содержимое перечисления value_code_t - структуру сообщения
+ * 3) Изменить структуру массива tcp_server_tx_t.tx_values - оффсеты и размеры полей сообщения
+ * 4) Переписать содержимое функции tcp_server_tx_update() - модификацию сообщения
+ * @see TCP_TX_BUFF_SIZE value_code_t tcp_server_tx_t tcp_server_tx_update()
  */
 
 #include "tcp_server_tx.h"
@@ -13,61 +18,77 @@
 #include <stdlib.h>
 #include "main.h"
 
-// For other projects change
-// 1) TCP_TX_BUFF_SIZE - buffer size
-// 2) value_code_t - message content
-// 3) tx_values[VALUE_SIZE] - values` addresses and sizes
-// 4) tcp_server_tx_update() - update data
+#include "version.h"
 
-#define TCP_TX_BUFF_SIZE 64
-
+#define TCP_TX_BUFF_SIZE 64 ///< Размер исходящего сообщения
+/**
+ * @brief Эмулирует данные исходящего пакета
+ */
 static void emulate_data();
-
+/**
+ * @brief Перечисление описывает структуру сообщения
+ */
 typedef enum
 {
-	VALUE_MESSAGE_NO,
-	VALUE_DOSE_A,
-	VALUE_DOSE_B,
-	VALUE_HV_A,
-	VALUE_HV_B,
-	VALUE_TEMP_A,
-	VALUE_TEMP_B,
-	VALUE_SENSITIVITY_A,
-	VALUE_SENSITIVITY_B,
-	VALUE_HV_POLARITY_A,
-	VALUE_HV_POLARITY_B,
-	VALUE_HV_ENABLED_A,
-	VALUE_HV_ENABLED_B,
-	VALUE_SIZE
+	VALUE_MESSAGE_NO, ///< Порядковый номер сообщения
+	VALUE_DOSE_A, ///< Сигнал АЦП камеры канала A
+	VALUE_DOSE_B, ///< Сигнал АЦП камеры канала B
+	VALUE_HV_A, ///< Величина высокого напряжения канала A
+	VALUE_HV_B, ///< Величина высокого напряжения канала B
+	VALUE_TEMP_A, ///< Температура внутреннего объема устройства с датчика A
+	VALUE_TEMP_B, ///< Температура внутреннего объема устройства с датчика B
+	VALUE_SENSITIVITY_A, ///< Код текущей чувствительности для канала A
+	VALUE_SENSITIVITY_B, ///< Код текущей чувствительности для канала B
+	VALUE_HV_POLARITY_A, ///< Полярность высокого напряжения с канала A
+	VALUE_HV_POLARITY_B, ///< Полярность высокого напряжения с канала B
+	VALUE_HV_ENABLED_A, ///< Высокого напряжение вкл/выкл на канале A
+	VALUE_HV_ENABLED_B, ///< Высокого напряжение вкл/выкл на канале B
+	VALUE_VERSION_MAJOR, ///< Major версия прошивки
+	VALUE_VERSION_MINOR, ///< Minor версия прошивки
+	VALUE_SIZE ///< Количество элементов в сообщении
 } value_code_t;
 
+/**
+ * @brief Структура хранит для конкретного поля в пакете - оффсет и размер
+ */
 typedef struct
 {
 	uint16_t offset;
 	uint16_t size;
 } value_address_t;
 
+/**
+ * @brief Копирует данные в указанное поле исходящего пакета
+ * @param[in] code Код поля сообщения (оффсет и размер подтягиваются из массива data.tx_values)
+ * @param[in] src Указатель на входные данные
+ */
 static void tcp_server_tx_set_value(value_code_t code, void* src);
-
+/**
+ * @brief Основная структура модуля, содержащая всю
+ * информацию об исходящем пакете
+ */
 typedef struct
 {
-	uint8_t buff[TCP_TX_BUFF_SIZE];
-	value_address_t tx_values[VALUE_SIZE];
-	uint32_t message_id;
-	int32_t dose_A;
-	int32_t dose_B;
-	int32_t hv_A;
-	int32_t hv_B;
-	int32_t temp_A;
-	int32_t temp_B;
-	uint8_t sensitivity_A;
-	uint8_t sensitivity_B;
-	uint8_t polarity_A;
-	uint8_t polarity_B;
-	uint8_t hv_enabled_A;
-	uint8_t hv_enabled_B;
+	uint8_t buff[TCP_TX_BUFF_SIZE]; ///< Буфер исходящего сообщения
+	value_address_t tx_values[VALUE_SIZE]; ///< Массив, хранящий оффсеты и размеры всех полей пакета
+	uint32_t message_id; ///< Порядковый номер сообщения
+	int32_t dose_A; ///< Величина сигнала с камеры канала A
+	int32_t dose_B; ///< Величина сигнала с камеры канала B
+	int32_t hv_A;  ///< Величина высокого напряжения с канала A, B
+	int32_t hv_B;  ///< Величина высокого напряжения с канала B, B
+	int32_t temp_A;  ///< Температура внутреннего объема устройства с датчика A, *C
+	int32_t temp_B; ///< Температура внутреннего объема устройства с датчика B, *C
+	uint8_t sensitivity_A; ///< Код текущей чувствительности для канала A
+	uint8_t sensitivity_B;///< Код текущей чувствительности для канала B
+	uint8_t polarity_A;///< Полярность высокого напряжения с канала A
+	uint8_t polarity_B;///< Полярность высокого напряжения с канала B
+	uint8_t hv_enabled_A; ///< Высокого напряжение вкл/выкл на канале A
+	uint8_t hv_enabled_B; ///< Высокого напряжение вкл/выкл на канале B
 } tcp_server_tx_t;
-
+/**
+ * @brief Единственный экземпляр структуры tcp_server_tx_t.
+ * Работа всех определенных в файле функций происходит только с ней
+ */
 static tcp_server_tx_t data;
 
 void tcp_server_tx_init()
@@ -87,6 +108,8 @@ void tcp_server_tx_init()
 	data.tx_values[VALUE_HV_POLARITY_B] = (value_address_t){31, 1};
 	data.tx_values[VALUE_HV_ENABLED_A] = (value_address_t){32, 1};
 	data.tx_values[VALUE_HV_ENABLED_B] = (value_address_t){33, 1};
+	data.tx_values[VALUE_VERSION_MAJOR] = (value_address_t){62, 1};
+	data.tx_values[VALUE_VERSION_MINOR] = (value_address_t){63, 1};
 }
 
 uint8_t* tcp_server_tx_get()
@@ -101,19 +124,13 @@ int tcp_server_tx_size()
 
 void tcp_server_tx_update()
 {
-	// update data in message
-	// in general it depends on rx but in this project message content is constant
-	// uint8_t* rx_message = tcp_server_rx_get();...
-
 	data.message_id++;
-	//emulate_data();
-
 	data.dose_A = signal_get_output_A();
 	data.dose_B = signal_get_output_B();
 	data.hv_enabled_A = HAL_GPIO_ReadPin(HV_EN_A_GPIO_Port, HV_EN_A_Pin);
 	data.hv_enabled_B = HAL_GPIO_ReadPin(HV_EN_B_GPIO_Port, HV_EN_B_Pin);
-	data.hv_A = hv_get_output_A();  // raw data
-	data.hv_B = hv_get_output_B();  // raw data
+	data.hv_A = hv_get_output_A();
+	data.hv_B = hv_get_output_B();
 	data.temp_A = hv_get_output_temp();
 	data.temp_B = hv_get_output_temp();
 	data.sensitivity_A = HAL_GPIO_ReadPin(SENSITIVITY_A_GPIO_Port, SENSITIVITY_A_Pin);
@@ -136,6 +153,11 @@ void tcp_server_tx_update()
 	tcp_server_tx_set_value(VALUE_HV_POLARITY_B, &data.polarity_B);
 	tcp_server_tx_set_value(VALUE_HV_ENABLED_A, &data.hv_enabled_A);
 	tcp_server_tx_set_value(VALUE_HV_ENABLED_B, &data.hv_enabled_B);
+
+	uint8_t val = (int)VERSION_MAJOR;
+	tcp_server_tx_set_value(VALUE_VERSION_MAJOR, &val);
+	val = (int)VERSION_MINOR;
+	tcp_server_tx_set_value(VALUE_VERSION_MINOR, &val);
 }
 
 int tcp_server_tx_get_msg_id()

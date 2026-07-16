@@ -1,32 +1,49 @@
-/*
- * ads1246.c
- *
- *  Created on: Mar 16, 2026
- *      Author: Kirill
+/**
+ * @file ads1246.c
+ * @brief Файл с определениями функций, отвечающих за работу
+ * микросхемы АЦП ADS1246 в режиме DMA
  */
-
 #include "ads1246.h"
 #include <string.h>
 #include <math.h>
 
-static const uint8_t CMD_WAKEUP 	= 0x00;
-static const uint8_t CMD_NOP 		= 0xFF;
-static const uint8_t CMD_RDATA 	= 0x12;
-static const uint8_t CMD_WREG 	= 0x40;
-static const uint8_t REG_SYS0 	= 0x03;
+static const uint8_t CMD_WAKEUP = 0x00; ///< Код команды на пробуждение
+static const uint8_t CMD_NOP 	= 0xFF; ///< Код пустой команды
+static const uint8_t CMD_RDATA 	= 0x12; ///< Код команды на чтение выхода
+static const uint8_t CMD_WREG 	= 0x40; ///< Код команды на запись значения в регистр
+static const uint8_t REG_SYS0 	= 0x03; ///< Код регистра SYS0
 
-#define ADC_ADS1246_SPI_TIMEOUT 10
-
-/* imprecise small delay */
+#define ADC_ADS1246_SPI_TIMEOUT 10 ///< Timeout для блокирующего режима SPI
+/**
+ * @brief Задержка в микросекундах
+ * @param[in] us Величина задержки, мкс
+ */
 __STATIC_INLINE void delayUs(volatile uint32_t us)
 {
 	us *= (SystemCoreClock / 1000000);
 	while (us--);
 }
-
+/**
+ * @brief Отправка 1 байта по SPI в блокирующем режиме
+ * @param[in] self Указатель на структуру ADS1246
+ * @param[in] cmd Байт для отправки
+ */
 static void spi_command(ads1246_t* self, uint8_t cmd);
+/**
+ * @brief SPI select (CS 1->0)
+ * @param[in] self Указатель на структуру ADS1246
+ */
 static void spi_select(ads1246_t* self);
+/**
+ * @brief SPI select (CS 0->1)
+ * @param[in] self Указатель на структуру ADS1246
+ */
 static void spi_deselect(ads1246_t* self);
+/**
+ * @brief Привести 24-битное значение в соответствие к 32-битному
+ * (заполение старших битов в зависимости от знака входной 24-битной величины)
+ * @param[in] val Указатель на 24-битное значение
+ */
 static void check_negative_24_to_32(int32_t* val);
 
 void ads1246_init(ads1246_t* self)
@@ -95,26 +112,7 @@ void ads1246_setup(ads1246_t* self)
 void ads1246_update(ads1246_t* self)
 {
 	spi_select(self);
-	//HAL_SPI_Receive_DMA(self->hspi, self->rxBuff, ADS1246_RX_BUFF_SIZE);
 	HAL_SPI_TransmitReceive_DMA(self->hspi, self->txBuff, self->rxBuff, ADS1246_RX_BUFF_SIZE);
-
-	/*const uint8_t kDataSizeBytes = 3;
-	const uint8_t kBufferSizeBytes = 4;
-	uint8_t rxBytes [kBufferSizeBytes];
-
-	spi_select(self);
-	spi_command(self, CMD_RDATA); // can avoid sending command???
-	int i;
-	for(i = 0; i < kDataSizeBytes; ++i)
-	{
-		HAL_SPI_TransmitReceive(self->hspi, &CMD_NOP, rxBytes + kDataSizeBytes - i - 1, 1, ADC_ADS1246_SPI_TIMEOUT);
-		while(HAL_SPI_GetState(self->hspi) != HAL_SPI_STATE_READY)
-			;
-	}
-	spi_deselect(self);
-	check_negative_24_to_32((int32_t*)rxBytes);
-	self->lastOutputValue = *(int32_t*)rxBytes;
-	spi_deselect(self); */
 }
 
 void ads1246_spi_dma_cplt(ads1246_t *self)
@@ -180,4 +178,4 @@ static void check_negative_24_to_32(int32_t* val)
 	}
 }
 
-
+#undef ADC_ADS1246_SPI_TIMEOUT

@@ -34,25 +34,17 @@ static int16_t get_complement_code_16bit(int16_t val);
 int ads1220_init(ads1220_t *self)
 {
 	memset(self, 0, sizeof(*self));
-	// spi
 	self->hspi = NULL;
-	// cs
 	self->portCS = NULL;
 	self->pinCS = 0;
-	// xdrdy
 	self->portXDRDY = NULL;
-	self->pinXDRDY = 0;
-	// Vref
 	self->Vref_neg = 0;
 	self->Vref_pos = 2.048;
-
 	self->measureMode = MEASURE_CH_A;
 	self->lastOutputValue_A = 0;
 	self->lastOutputValue_B = 0;
 	self->lastOutputValue_Temp = 0;
-
 	self->maxOutputValue = (int)pow(2, 24);
-
 	self->dataRate = 0b000;
 	self->gain = 0b000;
 	return 0;
@@ -123,13 +115,9 @@ void ads1220_setup(ads1220_t *self)
 
 void ads1220_update(ads1220_t *self)
 {
-	// spi read data
 	spi_select(self);
-	//comm_rdata(self);
 	read_dout(self);
 	spi_deselect(self);
-	// command to register to switch mux
-
 }
 
 int ads1220_get_output_A(ads1220_t *self)
@@ -249,7 +237,7 @@ static void read_dout(ads1220_t* self)
 		break;
 	case MEASURE_CH_B:
 		memcpy(txBytes + 0, &wreg, 1);
-		memcpy(txBytes + 1, &cr0_chB, 1); // not imp
+		memcpy(txBytes + 1, &cr0_chB, 1);
 		memcpy(txBytes + 2, &cr1_temp, 1);
 		break;
 	case MEASURE_TEMP:

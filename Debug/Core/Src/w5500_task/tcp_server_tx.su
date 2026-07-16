@@ -1,7 +1,0 @@
-../Core/Src/w5500_task/tcp_server_tx.c:73:6:tcp_server_tx_init	64	static
-../Core/Src/w5500_task/tcp_server_tx.c:92:10:tcp_server_tx_get	4	static
-../Core/Src/w5500_task/tcp_server_tx.c:97:5:tcp_server_tx_size	4	static
-../Core/Src/w5500_task/tcp_server_tx.c:102:6:tcp_server_tx_update	8	static
-../Core/Src/w5500_task/tcp_server_tx.c:141:5:tcp_server_tx_get_msg_id	4	static
-../Core/Src/w5500_task/tcp_server_tx.c:146:13:tcp_server_tx_set_value	24	static
-../Core/Src/w5500_task/tcp_server_tx.c:153:13:emulate_data	8	static

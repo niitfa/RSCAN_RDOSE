@@ -1,7 +1,0 @@
-../Core/Src/hv_task/hv_task.c:33:6:hv_task_init	24	static
-../Core/Src/hv_task/hv_task.c:67:5:hv_get_output_A	16	static
-../Core/Src/hv_task/hv_task.c:73:5:hv_get_output_B	16	static
-../Core/Src/hv_task/hv_task.c:79:6:hv_set_output_A	24	static
-../Core/Src/hv_task/hv_task.c:88:6:hv_set_output_B	24	static
-../Core/Src/hv_task/hv_task.c:97:5:hv_get_output_temp	16	static
-../Core/Src/hv_task/hv_task.c:103:6:hv_adc_xdrdy_callback	16	static

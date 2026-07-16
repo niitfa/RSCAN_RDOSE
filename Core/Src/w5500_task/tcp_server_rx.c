@@ -1,17 +1,15 @@
-/*
- * tcp_server_rx.c
- *
- *  Created on: Dec 25, 2025
- *  Author: Kirill
+/**
+ * @file tcp_server_rx.c
+ * @brief Файл содержит информацию об входящем пакете,
+ * выполнении полученных команд и определения соответствующих
+ * функций и структур данных
+ * @details Для адаптации этого модуля к другим проектам
+ * 1) Изменить размер буфера TCP_RX_BUFF_SIZE
+ * 2) Изменить содержимое перечисления value_code_t - оффсеты и размеры полей сообщения
+ * 3) Изменить содержимое перечисления tcp_command_code_t - коды команд
+ * 4) Переписать содержимое функции tcp_server_rx_handle() - обработку сообщения
+ * @see TCP_RX_BUFF_SIZE value_code_t tcp_command_code_t tcp_server_rx_handle()
  */
-
-// For other projects change
-// 1) TCP_RX_BUFF_SIZE - buffer size
-// 2) command_code_t - list of commands from client
-// 3) value_code_t - message content
-// 4) rx_values[VALUE_SIZE] - values` addresses and sizes
-// 5) tcp_server_rx_handle() - command execution
-
 
 #include "tcp_server_rx.h"
 #include "hv_task.h"
@@ -19,34 +17,43 @@
 #include <string.h>
 #include "main.h"
 
-#define TCP_RX_BUFF_SIZE 64
-
+#define TCP_RX_BUFF_SIZE 64 ///< Размер входящего сообщения
+/**
+ * @brief Перечисление описывает структуру входящего сообщения
+ */
 typedef enum
 {
-	VALUE_COMMAND_CODE,
-	VALUE_COMMAND_PARAM,
-	VALUE_SIZE
+	VALUE_COMMAND_CODE, ///< Код команды
+	VALUE_COMMAND_PARAM, ///< Параметр команды
+	VALUE_SIZE ///< Количество элементов
 } value_code_t;
-
+/**
+ * @brief Структура хранит для конкретного поля в пакете - оффсет и размер
+ */
 typedef struct
 {
-	uint16_t offset;
-	uint8_t size;
+	uint16_t offset; ///< Оффсет поля
+	uint8_t size; ///< Размер поля
 } value_address_t;
-
+/**
+ * @brief Основная структура модуля,
+ * содержащая информацию о входящем пакете
+ */
 typedef struct
 {
-	uint8_t buff[TCP_RX_BUFF_SIZE];
-	value_address_t rx_values[VALUE_SIZE];
-	command_code_t lastCommand;
+	uint8_t buff[TCP_RX_BUFF_SIZE]; ///< Буфер входящего сообщения
+	value_address_t rx_values[VALUE_SIZE];///< Массив, хранящий оффсеты и размеры всех полей пакета
+	command_code_t lastCommand; ///< Код последней принятой команды
 } tcp_server_rx_t;
-
+/**
+ * @brief Единственный экземпляр структуры tcp_server_rx_t.
+ * Работа всех определенных в файле функций происходит только с ней
+ */
 static tcp_server_rx_t data;
 
 void tcp_server_rx_init()
 {
 	memset (&data, 0, sizeof (data));
-
 	data.rx_values[VALUE_COMMAND_CODE] 	= (value_address_t){0, 4};
 	data.rx_values[VALUE_COMMAND_PARAM] = (value_address_t){4, 4};
 }
@@ -114,11 +121,3 @@ void tcp_server_rx_handle()
 		break;
 	}
 }
-
-int tcp_server_rx_get_last_command_code()
-{
-	return data.lastCommand;
-}
-
-
-

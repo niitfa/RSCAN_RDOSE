@@ -1,7 +1,0 @@
-../Core/Src/hv_task/hv_task.c:33:6:hv_task_init	1
-../Core/Src/hv_task/hv_task.c:67:5:hv_get_output_A	1
-../Core/Src/hv_task/hv_task.c:73:5:hv_get_output_B	1
-../Core/Src/hv_task/hv_task.c:79:6:hv_set_output_A	3
-../Core/Src/hv_task/hv_task.c:88:6:hv_set_output_B	3
-../Core/Src/hv_task/hv_task.c:97:5:hv_get_output_temp	1
-../Core/Src/hv_task/hv_task.c:103:6:hv_adc_xdrdy_callback	2

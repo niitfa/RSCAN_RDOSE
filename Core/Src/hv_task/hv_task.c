@@ -1,8 +1,8 @@
-/*
- * hv_adc_task.c
- *
- *  Created on: Jan 12, 2026
- *      Author: Kirill
+/**
+ * @file hv_task.c
+ * @brief Файл с определениями функций и структуры, отвечающих за работу
+ * высоковольтной системы, управление высоким напряжением
+ * и получение обратной связи по высокому напряжению
  */
 
 #include "hv_task.h"
@@ -12,22 +12,28 @@
 #include <string.h>
 #include <math.h>
 
-extern SPI_HandleTypeDef ADS1220_SPI;
-extern DAC_HandleTypeDef hdac;
-
+extern SPI_HandleTypeDef ADS1220_SPI; ///< SPI АЦП обратной связи по напряжению
+extern DAC_HandleTypeDef hdac; ///< Интегрированный в МК ЦАП, отвечающий за управление
+								///< входом ВВ источника
+/**
+ * @brief Основная структура модуля, содержащая
+ * данные об состоянии и характеристиках ВВ системы
+ */
 typedef struct
 {
 	ads1220_t adc;
 	int outputVoltageDivider;
 	double adcRefVoltageNegative;
 	double adcRefVoltagePositive;
-
 	int dacMaxValue;
 	int V_high_max;
 	int k_in;
 	int k_out;
 } hv_task_t;
-
+/**
+ * @brief Единственный экземпляр структуры hv_task_t.
+ * Работа всех определенных в файле функций происходит только с ней
+ */
 static hv_task_t task;
 
 void hv_task_init()
