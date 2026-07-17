@@ -1,13 +1,11 @@
-/*
- * rdose_command_executer.c
- *
- *  Created on: Feb 4, 2026
- *      Author: Kirill
+/**
+ * @file command_executer.c
+ * @brief Файл с определениями функций, выполняющие внешние команды
  */
 
 #include "command_executer.h"
 
-// comms list
+
 
 
 

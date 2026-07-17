@@ -1,34 +1,105 @@
-/*
- * ads1220.c
- *
- *  Created on: Feb 17, 2026
- *      Author: Kirill
+/**
+ * @file ads1220.c
+ * @brief Файл с определенями функций, отвечающих за работу
+ * микросхемы АЦП ADS1220 в режиме DMA.
  */
 #include "ads1220.h"
 #include <string.h>
 #include <math.h>
 
-/* imprecise small delay */
+/**
+ * @brief Задержка в микросекундах
+ * @param[in] us Величина задержки, мкс
+ */
 __STATIC_INLINE void delayUs(volatile uint32_t us)
 {
 	us *= (SystemCoreClock / 1000000);
 	while (us--);
 }
-
+/**
+ * @brief Отправка 1 байта по SPI в блокирующем режиме
+ * @param[in] self Указатель на структуру ADS1220
+ * @param[in] cmd Байт для отправки
+ */
 static void spi_command(ads1220_t* self, uint8_t cmd);
+/**
+ * @brief SPI select (CS 1->0)
+ * @param[in] self Указатель на структуру ADS1220
+ */
 static void spi_select(ads1220_t* self);
+/**
+ * @brief SPI deselect (CS 0->1)
+ * @param[in] self Указатель на структуру ADS1220
+ */
 static void spi_deselect(ads1220_t* self);
-
+/**
+ * @brief Перезагрузка микросхемы ADS1220
+ * @param[in] self Указатель на структуру ADS1220
+ */
 static void reset(ads1220_t* self);
+/**
+ * @brief Команда на запись регистров
+ * @param[in] self Указатель на структуру ADS1220
+ * @param[in] rr Код стартового регистра
+ * @param[in] nn Количество регистров - 1 (0 при записи одного регистра)
+ */
 static void comm_wreg(ads1220_t* self, uint8_t rr, uint8_t nn);
+/**
+ * @brief Запись в Configuration register 0 (см. даташит)
+ * @param[in] self Указатель на структуру ADS1220
+ * @param[in] mux Input multiplexer configuration
+ * @param[in] gain Gain configuration
+ * @param[in] pga_bypass Disables and bypasses the internal low-noise PGA
+ */
 static void setup_reg0(ads1220_t* self, uint8_t mux, uint8_t gain, uint8_t pga_bypass);
+/**
+ * @brief Запись в Configuration register 1 (см. даташит)
+ * @param[in] self Указатель на структуру ADS1220
+ * @param[in] dr Data rate
+ * @param[in] mode Operating mode
+ * @param[in] cm Conversion mode
+ * @param[in] ts Temperature sensor mode
+ * @param[in] bcs Burn-out current sources
+ */
 static void setup_reg1(ads1220_t* self, uint8_t dr, uint8_t mode, uint8_t cm, uint8_t ts, uint8_t bcs);
+/**
+ * @brief Запись в Configuration register 2 (см. даташит)
+ * @param[in] self Указатель на структуру ADS1220
+ * @param[in] vref Voltage reference selection
+ * @param[in] filt FIR filter configuration
+ * @param[in] psw Low-side power switch configuration
+ * @param[in] idac IDAC current setting
+ */
 static void setup_reg2(ads1220_t* self, uint8_t vref, uint8_t filt, uint8_t psw, uint8_t idac);
+/**
+ * @brief Запись в Configuration register 3 (см. даташит)
+ * @param[in] self Указатель на структуру ADS1220
+ * @param[in] i1mux IDAC1 routing configuration
+ * @param[in] i2mux IDAC2 routing configuration
+ * @param[in] drdym xDRDY mode
+ */
 static void setup_reg3(ads1220_t* self, uint8_t i1mux, uint8_t i2mux, uint8_t drdym);
-
+/**
+ * @brief Старт преобразований
+ * @param[in] self Указатель на структуру ADS1220
+ */
 static void comm_startsync(ads1220_t* self);
+/**
+ * @brief Чтение цифрового выхода
+ * @param[in] self Указатель на структуру ADS1220
+ */
 static void read_dout(ads1220_t* self);
+/**
+ * @brief Привести 24-битное значение в соответствие к 32-битному
+ * (заполение старших битов в зависимости от знака входной 24-битной величины)
+ * @param[in] val Указатель на 24-битное значение
+ */
 static void check_negative_24_to_32(int* val);
+/**
+ * @brief Преобразовать 16-битное значение в комплементарный код
+ * @param[in] val Входное значение
+ * @return Преобразованное значение
+ */
 static int16_t get_complement_code_16bit(int16_t val);
 
 int ads1220_init(ads1220_t *self)
@@ -305,10 +376,3 @@ static int16_t get_complement_code_16bit(int16_t val)
 	}
 	return res;
 }
-
-
-
-
-
-
-

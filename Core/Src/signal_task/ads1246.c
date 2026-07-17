@@ -35,7 +35,7 @@ static void spi_command(ads1246_t* self, uint8_t cmd);
  */
 static void spi_select(ads1246_t* self);
 /**
- * @brief SPI select (CS 0->1)
+ * @brief SPI deselect (CS 0->1)
  * @param[in] self Указатель на структуру ADS1246
  */
 static void spi_deselect(ads1246_t* self);

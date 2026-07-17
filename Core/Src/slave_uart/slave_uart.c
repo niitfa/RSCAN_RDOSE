@@ -112,9 +112,9 @@ void slave_uart_handle_rx_message()
 		break;
 	case COMMAND_GET_HV_EN_B:
 		break;
-	case COMMAND_GET_RANGE_A:
+	case COMMAND_GET_SENSITIVITY_A:
 		break;
-	case COMMAND_GET_RANGE_B:
+	case COMMAND_GET_SENSITIVITY_B:
 		break;
 	case COMMAND_GET_TEMP:
 		break;

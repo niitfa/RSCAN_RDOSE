@@ -1,8 +1,6 @@
-/*
- * rdose_command_executer.h
- *
- *  Created on: Feb 4, 2026
- *      Author: Kirill
+/**
+ * @file command_executer.h
+ * @brief Файл с прототипами функций, выполняющие внешние команды
  */
 
 #ifndef SRC_RDOSE_COMMAND_EXECUTER_RDOSE_COMMAND_EXECUTER_H_

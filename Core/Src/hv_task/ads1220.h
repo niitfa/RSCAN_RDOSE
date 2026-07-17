@@ -4,7 +4,6 @@
  * микросхемы АЦП ADS1220 в режиме DMA. Частота SPI - до 20 МГц,
  * режим SPI - CPOL = LOW, CPHA = 2.
  */
-
 #ifndef SRC_HV_ADC_TASK_ADS1220_H_
 #define SRC_HV_ADC_TASK_ADS1220_H_
 
