@@ -26,6 +26,7 @@ typedef struct
 	int32_t lastOutputValue; ///< Последнее измеренное значение выхода АЦП
 	int32_t maxOutputValue; ///< Максимальное значение выходя АЦП
 	uint8_t SYS0_conf; ///< Параметр регистра SYS0
+	int FSC_conf; ///< Параметр регистров FSC[2:0] - 3 байта
 	uint8_t rxBuff[ADS1246_RX_BUFF_SIZE]; ///< Буфер чтения
 	uint8_t txBuff[ADS1246_TX_BUFF_SIZE]; ///< Буфер записи
 } ads1246_t;
@@ -54,6 +55,13 @@ void ads1246_set_cs_pin(ads1246_t* self, GPIO_TypeDef* port, uint16_t pin);
  * @param[in] pin Пин xDRDY
  */
 void ads1246_set_xdrdy_pin(ads1246_t* self, GPIO_TypeDef* port, uint16_t pin);
+/**
+ * @brief Устанавливает внутреннее усиление АЦП
+ * @detail x0.5 - 0x100000, x1 - 0x400000, x2 - 0x800000
+ * @param[in] self Указатель на структуру ADS1246
+ * @param[in] fsc Значение регистров FSC[2:0]
+ */
+void ads1246_set_gain_fsc(ads1246_t* self, int FSC_conf);
 /**
  * @brief Устанавливает опорное напряжение ADS1246
  * @param[in] self Указатель на структуру ADS1246

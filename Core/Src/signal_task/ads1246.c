@@ -13,6 +13,10 @@ static const uint8_t CMD_RDATA 	= 0x12; ///< Код команды на чтен
 static const uint8_t CMD_WREG 	= 0x40; ///< Код команды на запись значения в регистр
 static const uint8_t REG_SYS0 	= 0x03; ///< Код регистра SYS0
 
+static const uint8_t REG_FSC0 	= 0x07; ///< Код регистра FSC0
+//static const uint8_t REG_FSC1 	= 0x08; ///< Код регистра FSC1
+//static const uint8_t REG_FSC2 	= 0x09; ///< Код регистра FSC2
+
 #define ADC_ADS1246_SPI_TIMEOUT 10 ///< Timeout для блокирующего режима SPI
 /**
  * @brief Задержка в микросекундах
@@ -61,6 +65,7 @@ void ads1246_init(ads1246_t* self)
 	uint8_t PGA = 0b000;
 	uint8_t DR = 0b0010; // was 0b0010
 	self->SYS0_conf = DR | (PGA << 4);
+	self->FSC_conf = 0x400000; // x1
 
 	self->txBuff[0] = CMD_RDATA;
 	self->txBuff[1] = CMD_NOP;
@@ -86,6 +91,11 @@ void ads1246_set_xdrdy_pin(ads1246_t* self, GPIO_TypeDef* port, uint16_t pin)
 	self->pinXDRDY = pin;
 }
 
+void ads1246_set_gain_fsc(ads1246_t* self, int FSC_conf)
+{
+	self->FSC_conf = FSC_conf;
+}
+
 void ads1246_set_reference_voltage(ads1246_t* self, double negative, double positive)
 {
 	self->Vref_neg = negative;
@@ -107,6 +117,17 @@ void ads1246_setup(ads1246_t* self)
 	spi_command(self, 0); // 1 byte
 	spi_command(self, self->SYS0_conf);
 	spi_deselect(self);
+	delayUs(100);
+
+	//gain
+	spi_select(self);
+	spi_command(self, CMD_WREG | REG_FSC0);
+	spi_command(self, 2);
+	spi_command(self, self->FSC_conf >> 0);
+	spi_command(self, self->FSC_conf >> 8);
+	spi_command(self, self->FSC_conf >> 16);
+	spi_deselect(self);
+	delayUs(100);
 }
 
 void ads1246_update(ads1246_t* self)

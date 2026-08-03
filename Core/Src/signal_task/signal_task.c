@@ -39,6 +39,7 @@ void signal_task_init()
 	ads1246_set_cs_pin(adc, ADS1246_CS_A_GPIO_Port, ADS1246_CS_A_Pin);
 	ads1246_set_xdrdy_pin(adc, ADS1246_XDRDY_A_GPIO_Port, ADS1246_XDRDY_A_Pin);
 	ads1246_set_reference_voltage(adc, 0, 2.048);
+	ads1246_set_gain_fsc(adc, 0x800000);
 	ads1246_setup(adc);
 
 	adc = &task.adc_B;
@@ -47,6 +48,7 @@ void signal_task_init()
 	ads1246_set_cs_pin(adc, ADS1246_CS_B_GPIO_Port, ADS1246_CS_B_Pin);
 	ads1246_set_xdrdy_pin(adc, ADS1246_XDRDY_B_GPIO_Port, ADS1246_XDRDY_B_Pin);
 	ads1246_set_reference_voltage(adc, 0, 2.048);
+	ads1246_set_gain_fsc(adc, 0x800000);
 	ads1246_setup(adc);
 
 	// enable irq
