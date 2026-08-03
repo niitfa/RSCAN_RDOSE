@@ -13,7 +13,7 @@ static const uint8_t CMD_RDATA 	= 0x12; ///< Код команды на чтен
 static const uint8_t CMD_WREG 	= 0x40; ///< Код команды на запись значения в регистр
 static const uint8_t REG_SYS0 	= 0x03; ///< Код регистра SYS0
 
-static const uint8_t REG_FSC0 	= 0x07; ///< Код регистра FSC0
+//static const uint8_t REG_FSC0 	= 0x07; ///< Код регистра FSC0
 //static const uint8_t REG_FSC1 	= 0x08; ///< Код регистра FSC1
 //static const uint8_t REG_FSC2 	= 0x09; ///< Код регистра FSC2
 
@@ -62,15 +62,16 @@ void ads1246_init(ads1246_t* self)
 	self->Vref_pos = 2.048;
 	self->lastOutputValue = 0;
 	self->maxOutputValue = (int)pow(2, 24);
-	uint8_t PGA = 0b000;
-	uint8_t DR = 0b0010; // was 0b0010
-	self->SYS0_conf = DR | (PGA << 4);
-	self->FSC_conf = 0x400000; // x1
+	self->PGA = 0b000;
+	self->DR = 0b0010; // was 0b0010
+	self->SYS0_conf = self->DR | (self->PGA << 4);
 
 	self->txBuff[0] = CMD_RDATA;
 	self->txBuff[1] = CMD_NOP;
 	self->txBuff[2] = CMD_NOP;
 	self->txBuff[3] = CMD_NOP;
+
+	self->readingFlag = 0;
 }
 
 
@@ -91,47 +92,55 @@ void ads1246_set_xdrdy_pin(ads1246_t* self, GPIO_TypeDef* port, uint16_t pin)
 	self->pinXDRDY = pin;
 }
 
-void ads1246_set_gain_fsc(ads1246_t* self, int FSC_conf)
-{
-	self->FSC_conf = FSC_conf;
-}
-
 void ads1246_set_reference_voltage(ads1246_t* self, double negative, double positive)
 {
 	self->Vref_neg = negative;
 	self->Vref_pos = positive;
 }
 
-void ads1246_setup(ads1246_t* self)
+void ads1246_wakeup(ads1246_t* self)
 {
 	spi_deselect(self);
 	delayUs(10000);
-
 	spi_select(self);
 	spi_command(self, CMD_WAKEUP);
 	spi_deselect(self);
 	delayUs(100);
+}
 
-	spi_select(self);
-	spi_command(self, CMD_WREG | REG_SYS0);
-	spi_command(self, 0); // 1 byte
-	spi_command(self, self->SYS0_conf);
-	spi_deselect(self);
-	delayUs(100);
+void ads1246_setup_sys0(ads1246_t* self)
+{
+	self->SYS0_conf = self->DR | (self->PGA << 4);
 
-	//gain
-	spi_select(self);
-	spi_command(self, CMD_WREG | REG_FSC0);
-	spi_command(self, 2);
-	spi_command(self, self->FSC_conf >> 0);
-	spi_command(self, self->FSC_conf >> 8);
-	spi_command(self, self->FSC_conf >> 16);
-	spi_deselect(self);
-	delayUs(100);
+	int timeout_us = 100;
+	while(timeout_us--)
+	{
+		if(!self->readingFlag)
+		{
+			spi_select(self);
+			spi_command(self, CMD_WREG | REG_SYS0);
+			spi_command(self, 0); // 1 byte
+			spi_command(self, self->SYS0_conf);
+			spi_deselect(self);
+			return;
+		}
+		delayUs(1);
+	}
+}
+
+void ads1246_set_dr(ads1246_t* self, uint8_t dr)
+{
+	self->DR = dr;
+}
+
+void ads1246_set_pga(ads1246_t* self, uint8_t pga)
+{
+	self->PGA = pga;
 }
 
 void ads1246_update(ads1246_t* self)
 {
+	self->readingFlag = 1;
 	spi_select(self);
 	HAL_SPI_TransmitReceive_DMA(self->hspi, self->txBuff, self->rxBuff, ADS1246_RX_BUFF_SIZE);
 }
@@ -139,7 +148,7 @@ void ads1246_update(ads1246_t* self)
 void ads1246_spi_dma_cplt(ads1246_t *self)
 {
 	spi_deselect(self);
-
+	self->readingFlag = 0;
 	memset(((uint8_t*)&self->lastOutputValue) + 0, 0, 4);
 	memcpy(((uint8_t*)&self->lastOutputValue) + 0, self->rxBuff + 3, 1);
 	memcpy(((uint8_t*)&self->lastOutputValue) + 1, self->rxBuff + 2, 1);

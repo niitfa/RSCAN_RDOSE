@@ -26,6 +26,13 @@ typedef enum
 	COMMAND_SET_SENSITIVITY_A = 0x09, ///< Задать чувствительность на канале A
 	COMMAND_SET_SENSITIVITY_B = 0x0A, ///< Задать чувствительность на канале B
 
+	// отладочные команды
+	COMMAND_SET_ADC_DR_A = 0x40, ///< Задать частоту обновления данных АЦП канала A (отладка!)
+	COMMAND_SET_ADC_DR_B = 0x41, ///< Задать частоту обновления данных АЦП канала B (отладка!)
+	COMMAND_SET_ADC_GAIN_A = 0x42, ///< Задать усиление АЦП канала A (отладка!)
+	COMMAND_SET_ADC_GAIN_B = 0x43, ///< Задать усиление АЦП канала B (отладка!)
+
+
 	// telemetry request - uart only
 	COMMAND_GET_MESSAGE_NO = 0x80, ///< Запрос номера фрейма измерения
 	COMMAND_GET_DOSE_A = 0x81, ///< Запрос сигнала камеры с канала A

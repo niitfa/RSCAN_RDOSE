@@ -25,10 +25,13 @@ typedef struct
 	double Vref_pos; ///< Верхнее опорное напряжение (REFP)
 	int32_t lastOutputValue; ///< Последнее измеренное значение выхода АЦП
 	int32_t maxOutputValue; ///< Максимальное значение выходя АЦП
-	uint8_t SYS0_conf; ///< Параметр регистра SYS0
-	int FSC_conf; ///< Параметр регистров FSC[2:0] - 3 байта
+	uint8_t SYS0_conf; ///< Регистр SYS0
+	uint8_t PGA; ///< Параметр регистра SYS0 - Gain Amp
+	uint8_t DR; ///< Параметр регистра SYS0 - Data Rate
 	uint8_t rxBuff[ADS1246_RX_BUFF_SIZE]; ///< Буфер чтения
 	uint8_t txBuff[ADS1246_TX_BUFF_SIZE]; ///< Буфер записи
+	volatile uint8_t readingFlag; ///< Флаг отслеживания процесса чтения для избежания пересечения
+								///< с модификацией конфигурационных регистров
 } ads1246_t;
 /**
  * @brief Инициализирует АЦП. Присваивает значение полей структуру по умолчанию
@@ -56,24 +59,43 @@ void ads1246_set_cs_pin(ads1246_t* self, GPIO_TypeDef* port, uint16_t pin);
  */
 void ads1246_set_xdrdy_pin(ads1246_t* self, GPIO_TypeDef* port, uint16_t pin);
 /**
- * @brief Устанавливает внутреннее усиление АЦП
- * @detail x0.5 - 0x100000, x1 - 0x400000, x2 - 0x800000
- * @param[in] self Указатель на структуру ADS1246
- * @param[in] fsc Значение регистров FSC[2:0]
- */
-void ads1246_set_gain_fsc(ads1246_t* self, int FSC_conf);
-/**
  * @brief Устанавливает опорное напряжение ADS1246
  * @param[in] self Указатель на структуру ADS1246
  * @param[in] negative Нижнее опорное напряжение (REFN)
  * @param[in] positive Верхнее опорное напряжение (REFP)
  */
 void ads1246_set_reference_voltage(ads1246_t* self, double negative, double positive);
+
 /**
- * @brief Перезагружает микросхему и модифицирует ее конфигурационные регистры
+ * @brief Перезагружает микросхему
  * @param[in] self Указатель на структуру ADS1246
  */
-void ads1246_setup(ads1246_t* self);
+void ads1246_wakeup(ads1246_t* self);
+/**
+ * @brief Выполняет настройку регистра SYS0. Подготовка данных
+ * выполняется через вызов функций ads1246_set_dr и ads1246_set_pga
+ * @param[in] self Указатель на структуру ADS1246
+ * @see ads1246_set_dr, ads1246_set_pga
+ */
+void ads1246_setup_sys0(ads1246_t* self);
+/**
+ * @brief Устанавливает поле DR регистра SYS0, отвечающего за
+ * частоту обновления данных в АЦП. Отправка данных выполняется
+ * через вызов функции ads1246_setup_sys0
+ * @param[in] self Указатель на структуру ADS1246
+ * @param[in] dr Код частоты обновления (см. даташит)
+ * @see ads1246_setup_sys0
+ */
+void ads1246_set_dr(ads1246_t* self, uint8_t dr);
+/**
+ * @brief Устанавливает поле PGA регистра SYS0, отвечающего за
+ * внутреннее усиление в АЦП. Отправка данных выполняется
+ * через вызов функции ads1246_setup_sys0
+ * @param[in] self Указатель на структуру ADS1246
+ * @param[in] pga Код внутреннего усиления (см. даташит)
+ * @see ads1246_setup_sys0
+ */
+void ads1246_set_pga(ads1246_t* self, uint8_t pga);
 /**
  * @brief Читает по SPI шине выходное значение
  * @param[in] self Указатель на структуру ADS1246

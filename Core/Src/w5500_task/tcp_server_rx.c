@@ -117,6 +117,15 @@ void tcp_server_rx_handle()
 	case COMMAND_SET_SENSITIVITY_B:
 		HAL_GPIO_WritePin(SENSITIVITY_B_GPIO_Port, SENSITIVITY_B_Pin, (uint8_t)parameter);
 		break;
+		// debug
+	case COMMAND_SET_ADC_DR_A:
+		break;
+	case COMMAND_SET_ADC_DR_B:
+		break;
+	case COMMAND_SET_ADC_GAIN_A:
+		break;
+	case COMMAND_SET_ADC_GAIN_B:
+		break;
 	default:
 		break;
 	}

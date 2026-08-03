@@ -118,6 +118,8 @@ void slave_uart_handle_rx_message()
 		break;
 	case COMMAND_GET_TEMP:
 		break;
+	default:
+		break;
 	}
 	memcpy(slave_uart_tx_buffer() + RX_BYTE_COMMAND_VALUE_POS, (uint8_t*)&sendVal, RX_BYTE_COMMAND_VALUE_SIZE);
 	memcpy(slave_uart_tx_buffer() + RX_BYTE_COMMAND_CODE_POS, (uint8_t*)&command_code, RX_BYTE_COMMAND_CODE_SIZE);
