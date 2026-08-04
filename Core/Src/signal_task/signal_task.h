@@ -27,6 +27,16 @@ int signal_get_output_A();
  */
 int signal_get_output_B();
 /**
+ * @brief Возвращает адрес структуры АЦП канала A
+ * @return Адрес структуры АЦП канала A
+ */
+ads1246_t* signal_get_adc_A();
+/**
+ * @brief Возвращает адрес структуры АЦП канала B
+ * @return Адрес структуры АЦП канала B
+ */
+ads1246_t* signal_get_adc_B();
+/**
  * @brief Обработчик прерывания сигнала готовности данных АЦП
  * @param[in] GPIO_Pin Пин
  */

@@ -71,6 +71,16 @@ int signal_get_output_B()
 	return ads1246_get_output(&task.adc_B);
 }
 
+ads1246_t* signal_get_adc_A()
+{
+	return &task.adc_A;
+}
+
+ads1246_t* signal_get_adc_B()
+{
+	return &task.adc_B;
+}
+
 void signal_adc_xdrdy_callback(uint16_t GPIO_Pin)
 {
 	if(GPIO_Pin == ads1246_get_xdrdy_pin(&task.adc_A))

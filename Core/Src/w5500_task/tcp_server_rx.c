@@ -17,6 +17,8 @@
 #include <string.h>
 #include "main.h"
 
+#include "signal_task.h"
+
 #define TCP_RX_BUFF_SIZE 64 ///< Размер входящего сообщения
 /**
  * @brief Перечисление описывает структуру входящего сообщения
@@ -119,12 +121,20 @@ void tcp_server_rx_handle()
 		break;
 		// debug
 	case COMMAND_SET_ADC_DR_A:
+		ads1246_set_dr(signal_get_adc_A(), (uint8_t)parameter);
+		ads1246_setup_sys0(signal_get_adc_A());
 		break;
 	case COMMAND_SET_ADC_DR_B:
+		ads1246_set_dr(signal_get_adc_B(), (uint8_t)parameter);
+		ads1246_setup_sys0(signal_get_adc_B());
 		break;
 	case COMMAND_SET_ADC_GAIN_A:
+		ads1246_set_pga(signal_get_adc_A(), (uint8_t)parameter);
+		ads1246_setup_sys0(signal_get_adc_A());
 		break;
 	case COMMAND_SET_ADC_GAIN_B:
+		ads1246_set_pga(signal_get_adc_B(), (uint8_t)parameter);
+		ads1246_setup_sys0(signal_get_adc_B());
 		break;
 	default:
 		break;
