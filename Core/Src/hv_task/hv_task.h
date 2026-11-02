@@ -15,8 +15,9 @@
  * @brief Инициализирует периферию высоковольтной системы
  * - ЦАП для управления входом ВВ источника и
  *  АЦП обратной связи по высокому напряжению
+ * @param[in] updatePeriod_ms Выбранный период вызова цикла задания
  */
-void hv_task_init();
+void hv_task_init(int updatePeriod_ms);
 /**
  * @brief Возвращает текущее значение высокого напряжения на канале A
  * @return Высокое напряжения канала A, В
@@ -43,9 +44,22 @@ void hv_set_output_B(int volt);
  */
 int hv_get_output_temp();
 /**
+ * @brief Останавливает процесс коррекции напряжения на канале A
+ */
+void hv_reset_correction_A();
+/**
+ * @brief Останавливает процесс коррекции напряжения на канале B
+ */
+void hv_reset_correction_B();
+/**
+ * @brief Цикл коррекции напряжения на каналах A и B
+ */
+void hv_correction_tick();
+/**
  * @brief Обработчик готовности данных АЦП обратной связи по высокому напряжению
  * @param[in] GPIO_Pin Пин готовности данных xDRDY
  */
+
 void hv_adc_xdrdy_callback(uint16_t GPIO_Pin);
 
 #endif /* SRC_HV_ADC_TASK_HV_ADC_TASK_H_ */

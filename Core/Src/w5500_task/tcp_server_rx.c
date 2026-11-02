@@ -89,17 +89,21 @@ void tcp_server_rx_handle()
 	{
 	case COMMAND_ENABLE_HV_A:
 		HAL_GPIO_WritePin(HV_EN_A_GPIO_Port, HV_EN_A_Pin, 1);
+		hv_reset_correction_A();
 		break;
 	case COMMAND_ENABLE_HV_B:
 		HAL_GPIO_WritePin(HV_EN_B_GPIO_Port, HV_EN_B_Pin, 1);
+		hv_reset_correction_B();
 		break;
 	case COMMAND_DISABLE_HV_A:
 		HAL_GPIO_WritePin(HV_EN_A_GPIO_Port, HV_EN_A_Pin, 0);
 		hv_set_output_A(0);
+		hv_reset_correction_A();
 		break;
 	case COMMAND_DISABLE_HV_B:
 		HAL_GPIO_WritePin(HV_EN_B_GPIO_Port, HV_EN_B_Pin, 0);
 		hv_set_output_B(0);
+		hv_reset_correction_B();
 		break;
 	case COMMAND_SET_VOLTAGE_A:
 		hv_set_output_A(parameter);
@@ -109,9 +113,11 @@ void tcp_server_rx_handle()
 		break;
 	case COMMAND_SET_HV_POLARITY_A:
 		HAL_GPIO_WritePin(HV_POL_A_GPIO_Port, HV_POL_A_Pin, (uint8_t)parameter);
+		hv_reset_correction_A();
 		break;
 	case COMMAND_SET_HV_POLARITY_B:
 		HAL_GPIO_WritePin(HV_POL_B_GPIO_Port, HV_POL_B_Pin, (uint8_t)parameter);
+		hv_reset_correction_B();
 		break;
 	case COMMAND_SET_SENSITIVITY_A:
 		HAL_GPIO_WritePin(SENSITIVITY_A_GPIO_Port, SENSITIVITY_A_Pin, (uint8_t)parameter);

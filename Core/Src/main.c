@@ -64,6 +64,7 @@ DMA_HandleTypeDef hdma_spi4_tx;
 UART_HandleTypeDef huart1;
 
 osThreadId defaultTaskHandle;
+osThreadId voltageTaskHandle;
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -79,6 +80,7 @@ static void MX_SPI3_Init(void);
 static void MX_SPI4_Init(void);
 static void MX_USART1_UART_Init(void);
 void StartDefaultTask(void const * argument);
+void StartVoltageTask(void const * argument);
 
 /* USER CODE BEGIN PFP */
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
@@ -158,6 +160,10 @@ int main(void)
   /* definition and creation of defaultTask */
   osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 1024);
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
+
+  /* definition and creation of voltageTask */
+  osThreadDef(voltageTask, StartVoltageTask, osPriorityBelowNormal, 0, 1024);
+  voltageTaskHandle = osThreadCreate(osThread(voltageTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -516,8 +522,10 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(ADS1220_CS_GPIO_Port, ADS1220_CS_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOD, SENSITIVITY_A_Pin|SENSITIVITY_B_Pin|HV_EN_A_Pin|HV_EN_B_Pin
-                          |HV_POL_A_Pin|HV_POL_B_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOD, SENSITIVITY_A_Pin|SENSITIVITY_B_Pin|HV_EN_A_Pin|HV_EN_B_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOD, HV_POL_A_Pin|HV_POL_B_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(W5500_RESET_GPIO_Port, W5500_RESET_Pin, GPIO_PIN_RESET);
@@ -610,13 +618,34 @@ void StartDefaultTask(void const * argument)
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
 	signal_task_init();
-	hv_task_init();
+	//hv_task_init();
 	w5500_task_init();
 	for(;;)
 	{
 		w5500_task_loop();
 	}
   /* USER CODE END 5 */
+}
+
+/* USER CODE BEGIN Header_StartVoltageTask */
+/**
+* @brief Function implementing the voltageTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartVoltageTask */
+void StartVoltageTask(void const * argument)
+{
+  /* USER CODE BEGIN StartVoltageTask */
+	/* Infinite loop */
+	int updatePeriod_ms = 100;
+	hv_task_init(updatePeriod_ms);
+	for(;;)
+	{
+		hv_correction_tick();
+		osDelay(updatePeriod_ms);
+	}
+  /* USER CODE END StartVoltageTask */
 }
 
 /**
