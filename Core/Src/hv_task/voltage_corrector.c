@@ -72,7 +72,6 @@ void voltage_corrector_tick(voltage_corrector_t* self)
 	voltage_stablility_check_tick(self);
 	switch(self->state)
 	{
-		break;
 	case VOLTAGE_CORRECTOR_STANDBY:
 		break;
 	case VOLTAGE_CORRECTOR_PROCESS:

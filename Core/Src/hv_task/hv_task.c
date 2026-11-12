@@ -64,7 +64,7 @@ static hv_task_t task;
 void hv_task_init(int updatePeriod_ms)
 {
 	memset(&task, 0, sizeof(task));
-	task.outputVoltageDivider = 500; //
+	task.outputVoltageDivider = 500;
 	task.adcRefVoltageNegative = 0;
 	task.adcRefVoltagePositive = 2.048;
 	task.k_in = pow(2, 23) / (task.adcRefVoltagePositive - task.adcRefVoltageNegative) / task.outputVoltageDivider;
@@ -93,8 +93,6 @@ void hv_task_init(int updatePeriod_ms)
 
 	voltage_corrector_init(&task.correctorA, set_voltage_A, read_voltage_A, updatePeriod_ms);
 	voltage_corrector_init(&task.correctorB, set_voltage_B, read_voltage_B, updatePeriod_ms);
-
-
 }
 
 int hv_get_output_A()
@@ -131,6 +129,16 @@ void hv_reset_correction_A()
 void hv_reset_correction_B()
 {
 	voltage_corrector_stop(&task.correctorB);
+}
+
+uint8_t hv_get_correction_state_A()
+{
+	return voltage_corrector_get_state(&task.correctorA);
+}
+
+uint8_t hv_get_correction_state_B()
+{
+	return voltage_corrector_get_state(&task.correctorB);
 }
 
 void hv_correction_tick()

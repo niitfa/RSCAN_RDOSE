@@ -43,6 +43,8 @@ typedef enum
 	VALUE_HV_POLARITY_B, ///< Полярность высокого напряжения с канала B
 	VALUE_HV_ENABLED_A, ///< Высокого напряжение вкл/выкл на канале A
 	VALUE_HV_ENABLED_B, ///< Высокого напряжение вкл/выкл на канале B
+	VALUE_HV_CORRECTION_STATE_A, ///< Состояние коррекции напряжения на канале A
+	VALUE_HV_CORRECTION_STATE_B, ///< Состояние коррекции напряжения на канале B
 	VALUE_VERSION_MAJOR, ///< Major версия прошивки
 	VALUE_VERSION_MINOR, ///< Minor версия прошивки
 	VALUE_SIZE ///< Количество элементов в сообщении
@@ -84,6 +86,8 @@ typedef struct
 	uint8_t polarity_B;///< Полярность высокого напряжения с канала B
 	uint8_t hv_enabled_A; ///< Высокого напряжение вкл/выкл на канале A
 	uint8_t hv_enabled_B; ///< Высокого напряжение вкл/выкл на канале B
+	uint8_t hv_correction_state_A; ///< Статус коррекции напряжения канала A
+	uint8_t hv_correction_state_B; ///< Статус коррекции напряжения канала B
 } tcp_server_tx_t;
 /**
  * @brief Единственный экземпляр структуры tcp_server_tx_t.
@@ -108,6 +112,8 @@ void tcp_server_tx_init()
 	data.tx_values[VALUE_HV_POLARITY_B] = (value_address_t){31, 1};
 	data.tx_values[VALUE_HV_ENABLED_A] = (value_address_t){32, 1};
 	data.tx_values[VALUE_HV_ENABLED_B] = (value_address_t){33, 1};
+	data.tx_values[VALUE_HV_CORRECTION_STATE_A] = (value_address_t){34, 1};
+	data.tx_values[VALUE_HV_CORRECTION_STATE_B] = (value_address_t){35, 1};
 	data.tx_values[VALUE_VERSION_MAJOR] = (value_address_t){62, 1};
 	data.tx_values[VALUE_VERSION_MINOR] = (value_address_t){63, 1};
 }
@@ -127,10 +133,10 @@ void tcp_server_tx_update()
 	data.message_id++;
 	data.dose_A = signal_get_output_A();
 	data.dose_B = signal_get_output_B();
-	data.hv_enabled_A = HAL_GPIO_ReadPin(HV_EN_A_GPIO_Port, HV_EN_A_Pin);
-	data.hv_enabled_B = HAL_GPIO_ReadPin(HV_EN_B_GPIO_Port, HV_EN_B_Pin);
 	data.hv_A = hv_get_output_A();
 	data.hv_B = hv_get_output_B();
+	data.hv_enabled_A = HAL_GPIO_ReadPin(HV_EN_A_GPIO_Port, HV_EN_A_Pin);
+	data.hv_enabled_B = HAL_GPIO_ReadPin(HV_EN_B_GPIO_Port, HV_EN_B_Pin);
 	data.temp_A = hv_get_output_temp();
 	data.temp_B = hv_get_output_temp();
 	data.sensitivity_A = HAL_GPIO_ReadPin(SENSITIVITY_A_GPIO_Port, SENSITIVITY_A_Pin);
@@ -139,6 +145,8 @@ void tcp_server_tx_update()
 	data.polarity_B = HAL_GPIO_ReadPin(HV_POL_B_GPIO_Port, HV_POL_B_Pin);
 	data.hv_enabled_A = HAL_GPIO_ReadPin(HV_EN_A_GPIO_Port, HV_EN_A_Pin);
 	data.hv_enabled_B = HAL_GPIO_ReadPin(HV_EN_B_GPIO_Port, HV_EN_B_Pin);
+	data.hv_correction_state_A = hv_get_correction_state_A();
+	data.hv_correction_state_B = hv_get_correction_state_B();
 
 	tcp_server_tx_set_value(VALUE_MESSAGE_NO, &data.message_id);
 	tcp_server_tx_set_value(VALUE_DOSE_A, &data.dose_A);
@@ -153,6 +161,8 @@ void tcp_server_tx_update()
 	tcp_server_tx_set_value(VALUE_HV_POLARITY_B, &data.polarity_B);
 	tcp_server_tx_set_value(VALUE_HV_ENABLED_A, &data.hv_enabled_A);
 	tcp_server_tx_set_value(VALUE_HV_ENABLED_B, &data.hv_enabled_B);
+	tcp_server_tx_set_value(VALUE_HV_CORRECTION_STATE_A, &data.hv_correction_state_A);
+	tcp_server_tx_set_value(VALUE_HV_CORRECTION_STATE_B, &data.hv_correction_state_B);
 
 	uint8_t val = (int)VERSION_MAJOR;
 	tcp_server_tx_set_value(VALUE_VERSION_MAJOR, &val);

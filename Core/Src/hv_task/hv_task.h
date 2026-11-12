@@ -52,6 +52,14 @@ void hv_reset_correction_A();
  */
 void hv_reset_correction_B();
 /**
+ * @brief Возвращает статус коррекции напряжения канала A
+ */
+uint8_t hv_get_correction_state_A();
+/**
+ * @brief Возвращает статус коррекции напряжения канала B
+ */
+uint8_t hv_get_correction_state_B();
+/**
  * @brief Цикл коррекции напряжения на каналах A и B
  */
 void hv_correction_tick();
