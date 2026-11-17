@@ -5,6 +5,7 @@
 #include "w5500_task.h"
 #include "cmsis_os.h"
 #include <string.h>
+#include "flash_data.h"
 /**
  * @brief Получение кода статуса сокета. Используется только внутри w5500_task_loop().
  * @return Код статуса сокета
@@ -90,11 +91,15 @@ typedef struct
 	uint16_t longDelayMs; ///< Величина длинной задержки, мс
 	uint8_t connected; ///< Флаг наличия соединения с клиентом
 } w5500_task_t;
+
 /**
  * @brief Единственный экземпляр структуры w5500_task_t.
  * Работа всех определенных в файле функций происходит только с ней
  */
 static w5500_task_t data;
+
+static uint8_t defaultIP[4] = {192, 168, 1, 12}; ///< IP по умолчанию
+static uint16_t defaultPort = 22250; ///< Порт по умолчанию
 
 void w5500_task_init()
 {
@@ -231,8 +236,22 @@ static int _send()
 
 static void _select_ip_and_port()
 {
-	uint8_t _ip[] = {192, 168, 1, 12};
+	/*uint8_t _ip[] = {192, 168, 1, 12};
 	data.port = 22250;
 	data.socket = 0;
-	memcpy(data.ip, _ip, 4);
+	memcpy(data.ip, _ip, 4); */
+
+	uint8_t ip[4];
+	flash_data_get_ip(ip);
+	if(*(int*)ip == 0xFFFFFFFF)
+	{
+		memcpy(ip, defaultIP, 4);
+	}
+	uint16_t port = flash_data_get_port();
+	if(port == 0xFFFF)
+	{
+		port = defaultPort;
+	}
+	data.port = port;
+	memcpy(data.ip, ip, 4);
 }

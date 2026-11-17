@@ -59,6 +59,8 @@
 									<listOptionValue builtIn="false" value="../Core/Src/hv_task"/>
 									<listOptionValue builtIn="false" value="../Core/Src/signal_task"/>
 									<listOptionValue builtIn="false" value="../Core/Src/version"/>
+									<listOptionValue builtIn="false" value="../Core/Src/uart_rx_handler"/>
+									<listOptionValue builtIn="false" value="../Core/Src/flash_data"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.424956503" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>

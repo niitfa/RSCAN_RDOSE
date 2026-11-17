@@ -25,6 +25,7 @@
 #include "w5500_task.h"
 #include "hv_task.h"
 #include "signal_task.h"
+#include "uart_rx_handler.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -88,7 +89,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 	hv_adc_xdrdy_callback(GPIO_Pin);
 	signal_adc_xdrdy_callback(GPIO_Pin);
 }
-
 
 void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi)
 {
@@ -619,6 +619,7 @@ void StartDefaultTask(void const * argument)
   /* Infinite loop */
 	signal_task_init();
 	//hv_task_init();
+	uart_handle_receive();
 	w5500_task_init();
 	for(;;)
 	{
