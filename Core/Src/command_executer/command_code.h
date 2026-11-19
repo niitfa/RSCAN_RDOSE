@@ -25,6 +25,11 @@ typedef enum
 	COMMAND_SET_HV_POLARITY_B = 0x08, ///< Задать полярность высокого напряжения на канале B
 	COMMAND_SET_SENSITIVITY_A = 0x09, ///< Задать чувствительность на канале A
 	COMMAND_SET_SENSITIVITY_B = 0x0A, ///< Задать чувствительность на канале B
+	COMMAND_SET_K_HV_POSITIVE_A = 0x0B, ///< Задать поправочный коэффициент ВН А+
+	COMMAND_SET_K_HV_NEGATIVE_A = 0x0C, ///< Задать поправочный коэффициент ВН А-
+	COMMAND_SET_K_HV_POSITIVE_B = 0x0D, ///< Задать поправочный коэффициент ВН B+
+	COMMAND_SET_K_HV_NEGATIVE_B = 0x0E, ///< Задать поправочный коэффициент ВН А-
+
 
 	// отладочные команды
 	COMMAND_SET_ADC_DR_A = 0x40, ///< Задать частоту обновления данных АЦП канала A (отладка!)

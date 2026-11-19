@@ -9,6 +9,7 @@
 #include "ads1220.h"
 #include "main.h"
 #include "voltage_corrector.h"
+#include "flash_data.h"
 
 #include <string.h>
 #include <math.h>
@@ -34,6 +35,10 @@ static void set_voltage_A(int volt);
  * @param[in] volt Высокое напряжения канала B, В
  */
 static void set_voltage_B(int volt);
+/**
+ * @brief Инициализирует поправочные коэффициенты высокого напряжения
+ */
+static void init_voltage_coeffs();
 
 extern SPI_HandleTypeDef ADS1220_SPI; ///< SPI АЦП обратной связи по напряжению
 extern DAC_HandleTypeDef hdac; ///< Интегрированный в МК ЦАП, отвечающий за управление
@@ -54,6 +59,12 @@ typedef struct
 	int k_out;
 	voltage_corrector_t correctorA;
 	voltage_corrector_t correctorB;
+
+	uint16_t kVoltage_positive_A;
+	uint16_t kVoltage_negative_A;
+	uint16_t kVoltage_positive_B;
+	uint16_t kVoltage_negative_B;
+
 } hv_task_t;
 /**
  * @brief Единственный экземпляр структуры hv_task_t.
@@ -69,6 +80,7 @@ void hv_task_init(int updatePeriod_ms)
 	task.adcRefVoltagePositive = 2.048;
 	task.k_in = pow(2, 23) / (task.adcRefVoltagePositive - task.adcRefVoltageNegative) / task.outputVoltageDivider;
 
+	init_voltage_coeffs();
 
 	// init adc
 	ads1220_t* adc = &task.adc;
@@ -158,18 +170,31 @@ void hv_adc_xdrdy_callback(uint16_t GPIO_Pin)
 static int read_voltage_A()
 {
 	ads1220_t* adc = &task.adc;
-	return abs(ads1220_get_output_A(adc) / task.k_in);
+
+	int voltage = abs(ads1220_get_output_A(adc) / task.k_in);
+	uint8_t polarity = HAL_GPIO_ReadPin(HV_POL_A_GPIO_Port, HV_POL_A_Pin);
+	float k = (polarity ? task.kVoltage_positive_A : task.kVoltage_negative_A) / 1000.;
+	voltage = voltage * k;
+
+	return voltage;
 }
 static int read_voltage_B()
 {
 	ads1220_t* adc = &task.adc;
-	return abs(ads1220_get_output_B(adc) / task.k_in);
+
+	int voltage = abs(ads1220_get_output_B(adc) / task.k_in);
+	uint8_t polarity = HAL_GPIO_ReadPin(HV_POL_B_GPIO_Port, HV_POL_B_Pin);
+	float k = (polarity ? task.kVoltage_positive_B : task.kVoltage_negative_B) / 1000;
+	voltage = voltage * k;
+
+	return voltage;
 }
 
 static void set_voltage_A(int volt)
 {
 	if(volt >= 0 && volt <= task.V_high_max)
 	{
+		// common part
 		int val = task.dacMaxValue * volt /  task.V_high_max;
 		HAL_DAC_SetValue(&hdac, DAC_CHANNEL_1, DAC_ALIGN_12B_R, (uint32_t)val);
 	}
@@ -178,9 +203,31 @@ static void set_voltage_B(int volt)
 {
 	if(volt >= 0 && volt <= task.V_high_max)
 	{
-		int val = task.dacMaxValue * volt /  task.V_high_max;
+		// common part
+		int val = task.dacMaxValue * volt / task.V_high_max;
 		HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2, DAC_ALIGN_12B_R, (uint32_t)val);
 	}
+}
+
+static void init_voltage_coeffs()
+{
+	uint16_t val = 1;
+	// positive A
+	val = flash_data_get_k_voltage_positive_A();
+	if(val == 0xFFFF) { val = 1000; }
+	task.kVoltage_positive_A = val;
+	// negative A
+	val = flash_data_get_k_voltage_negative_A();
+	if(val == 0xFFFF) { val = 1000; }
+	task.kVoltage_negative_A = val;
+	// positive B
+	val = flash_data_get_k_voltage_positive_B();
+	if(val == 0xFFFF) { val = 1000; }
+	task.kVoltage_positive_B = val;
+	// negative B
+	val = flash_data_get_k_voltage_negative_B();
+	if(val == 0xFFFF) { val = 1000; }
+	task.kVoltage_negative_B = val;
 }
 
 

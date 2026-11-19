@@ -18,6 +18,7 @@
 #include "main.h"
 
 #include "signal_task.h"
+#include "flash_data.h"
 
 #define TCP_RX_BUFF_SIZE 64 ///< Размер входящего сообщения
 /**
@@ -124,6 +125,18 @@ void tcp_server_rx_handle()
 		break;
 	case COMMAND_SET_SENSITIVITY_B:
 		HAL_GPIO_WritePin(SENSITIVITY_B_GPIO_Port, SENSITIVITY_B_Pin, (uint8_t)parameter);
+		break;
+	case COMMAND_SET_K_HV_POSITIVE_A:
+		flash_data_set_k_voltage_positive_A(parameter);
+		break;
+	case COMMAND_SET_K_HV_NEGATIVE_A:
+		flash_data_set_k_voltage_negative_A(parameter);
+		break;
+	case COMMAND_SET_K_HV_POSITIVE_B:
+		flash_data_set_k_voltage_positive_B(parameter);
+		break;
+	case COMMAND_SET_K_HV_NEGATIVE_B:
+		flash_data_set_k_voltage_negative_B(parameter);
 		break;
 		// debug
 	case COMMAND_SET_ADC_DR_A:

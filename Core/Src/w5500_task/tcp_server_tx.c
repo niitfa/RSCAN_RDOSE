@@ -19,12 +19,18 @@
 #include "main.h"
 
 #include "version.h"
+#include "flash_data.h"
 
 #define TCP_TX_BUFF_SIZE 64 ///< Размер исходящего сообщения
 /**
  * @brief Эмулирует данные исходящего пакета
  */
 static void emulate_data();
+/**
+ * @brief Записывает в пакет поправочные коэффициенты напряжений
+ */
+static void write_voltage_coeffs();
+
 /**
  * @brief Перечисление описывает структуру сообщения
  */
@@ -45,6 +51,10 @@ typedef enum
 	VALUE_HV_ENABLED_B, ///< Высокого напряжение вкл/выкл на канале B
 	VALUE_HV_CORRECTION_STATE_A, ///< Состояние коррекции напряжения на канале A
 	VALUE_HV_CORRECTION_STATE_B, ///< Состояние коррекции напряжения на канале B
+	VALUE_K_HV_POSITIVE_A, ///< Поправочный коэффициент ВН A+
+	VALUE_K_HV_NEGATIVE_A, ///< Поправочный коэффициент ВН A-
+	VALUE_K_HV_POSITIVE_B, ///< Поправочный коэффициент ВН B+
+	VALUE_K_HV_NEGATIVE_B, ///< Поправочный коэффициент ВН B-
 	VALUE_VERSION_MAJOR, ///< Major версия прошивки
 	VALUE_VERSION_MINOR, ///< Minor версия прошивки
 	VALUE_SIZE ///< Количество элементов в сообщении
@@ -114,8 +124,15 @@ void tcp_server_tx_init()
 	data.tx_values[VALUE_HV_ENABLED_B] = (value_address_t){33, 1};
 	data.tx_values[VALUE_HV_CORRECTION_STATE_A] = (value_address_t){34, 1};
 	data.tx_values[VALUE_HV_CORRECTION_STATE_B] = (value_address_t){35, 1};
+	data.tx_values[VALUE_K_HV_POSITIVE_A] = (value_address_t){36, 2};
+	data.tx_values[VALUE_K_HV_NEGATIVE_A] = (value_address_t){38, 2};
+	data.tx_values[VALUE_K_HV_POSITIVE_B] = (value_address_t){40, 2};
+	data.tx_values[VALUE_K_HV_NEGATIVE_B] = (value_address_t){42, 2};
 	data.tx_values[VALUE_VERSION_MAJOR] = (value_address_t){62, 1};
 	data.tx_values[VALUE_VERSION_MINOR] = (value_address_t){63, 1};
+
+	// init
+	write_voltage_coeffs();
 }
 
 uint8_t* tcp_server_tx_get()
@@ -194,4 +211,25 @@ static void emulate_data()
 	data.sensitivity_B = 1;
 	data.polarity_A = 0;
 	data.polarity_B = 1;
+}
+
+static void write_voltage_coeffs()
+{
+	uint16_t val = 1;
+	// positive A
+	val = flash_data_get_k_voltage_positive_A();
+	if(val == 0xFFFF) { val = 1000; }
+	tcp_server_tx_set_value(VALUE_K_HV_POSITIVE_A, &val);
+	// negative A
+	val = flash_data_get_k_voltage_negative_A();
+	if(val == 0xFFFF) { val = 1000; }
+	tcp_server_tx_set_value(VALUE_K_HV_NEGATIVE_A, &val);
+	// positive B
+ 	val = flash_data_get_k_voltage_positive_B();
+	if(val == 0xFFFF) { val = 1000; }
+	tcp_server_tx_set_value(VALUE_K_HV_POSITIVE_B, &val);
+	// negative B
+ 	val = flash_data_get_k_voltage_negative_B();
+	if(val == 0xFFFF) { val = 1000; }
+	tcp_server_tx_set_value(VALUE_K_HV_NEGATIVE_B, &val);
 }

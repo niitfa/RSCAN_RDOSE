@@ -1,8 +1,8 @@
 /**
  * @file flash_data.c
- * @brief Файл с определениями функций для работы с данными во flash,
- * а также сектором и адресом хранения структуры данных
- * памяти контроллера
+ * @brief пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ flash,
+ * пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+ * пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
  */
 
 #include "flash_data.h"
@@ -11,36 +11,40 @@
 #include "stm32f4xx_hal.h"
 
 /* Sector 8 0x08080000 - 0x0809FFFF */
-#define FLASH_DATA_SECTOR FLASH_SECTOR_8 ///< Сектор Flash (см. даташит контроллера)
-#define FLASH_DATA_BASE_ADDR 0x08080000 ///< Адрес сектора Flash (см. даташит контроллера)
+#define FLASH_DATA_SECTOR FLASH_SECTOR_8 ///< пїЅпїЅпїЅпїЅпїЅпїЅ Flash (пїЅпїЅ. пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ)
+#define FLASH_DATA_BASE_ADDR 0x08080000 ///< пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ Flash (пїЅпїЅ. пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ)
 
 /**
- * @brief Струкура данных для хранения во flash памяти
+ * @brief пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ flash пїЅпїЅпїЅпїЅпїЅпїЅ
  */
 typedef struct
 {
-	uint8_t ip[4]; ///< IP устройства
-	uint16_t port; ///< Порт устройства
+	uint8_t ip[4]; ///< IP пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+	uint16_t port; ///< пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+	uint16_t kVoltage_positive_A;
+	uint16_t kVoltage_negative_A;
+	uint16_t kVoltage_positive_B;
+	uint16_t kVoltage_negative_B;
 } flash_data_t;
 
 /**
- * @brief Локальный буфер струкуры flash_data_t для работы
- * с данными во flash памяти
+ * @brief пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ flash_data_t пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+ * пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ flash пїЅпїЅпїЅпїЅпїЅпїЅ
  */
 static flash_data_t data;
 /**
- * @brief Записывает данные из локального буфера во flash
+ * @brief пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ flash
  * @see data
  */
 static void flash_data_write();
 /**
- * @brief Выгружает данные из flash в локальный буфер
+ * @brief пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ flash пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
  * @see data
  */
 static void flash_data_read();
 /**
- * @brief Стирает сектор flash памяти, хранящий соответствующие данные.
- * Вызывается перед записью новых данных с этот сектор
+ * @brief пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ flash пїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ.
+ * пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
  */
 static void flash_data_erase_sector();
 
@@ -82,6 +86,53 @@ void flash_data_set_ip_and_port(uint8_t* ip_src, uint16_t port)
 		memcpy(data.ip, ip_src, 4);
 	}
 	flash_data_write();
+}
+
+void flash_data_set_k_voltage_positive_A(uint16_t k)
+{
+	flash_data_read();
+	data.kVoltage_positive_A = k;
+	flash_data_write();
+}
+void flash_data_set_k_voltage_negative_A(uint16_t k)
+{
+	flash_data_read();
+	data.kVoltage_negative_A = k;
+	flash_data_write();
+}
+void flash_data_set_k_voltage_positive_B(uint16_t k)
+{
+	flash_data_read();
+	data.kVoltage_positive_B = k;
+	flash_data_write();
+
+}
+void flash_data_set_k_voltage_negative_B(uint16_t k)
+{
+	flash_data_read();
+	data.kVoltage_negative_B = k;
+	flash_data_write();
+}
+
+uint16_t flash_data_get_k_voltage_positive_A()
+{
+	flash_data_read();
+	return data.kVoltage_positive_A;
+}
+uint16_t flash_data_get_k_voltage_negative_A()
+{
+	flash_data_read();
+	return data.kVoltage_negative_A;
+}
+uint16_t flash_data_get_k_voltage_positive_B()
+{
+	flash_data_read();
+	return data.kVoltage_positive_B;
+}
+uint16_t flash_data_get_k_voltage_negative_B()
+{
+	flash_data_read();
+	return data.kVoltage_negative_B;
 }
 
 // private
